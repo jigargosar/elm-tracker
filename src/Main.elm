@@ -3,7 +3,7 @@ module Main exposing (main)
 import Browser
 import Dict exposing (Dict)
 import Html exposing (Html)
-import Random exposing (Generator)
+import Random exposing (Generator, Seed)
 import Time exposing (Posix)
 
 
@@ -52,7 +52,9 @@ type alias ActivityLog =
 
 
 type alias Model =
-    { pd : Dict String Project }
+    { pd : Dict String Project
+    , seed : Seed
+    }
 
 
 type alias Flags =
@@ -61,7 +63,9 @@ type alias Flags =
 
 init : Flags -> ( Model, Cmd Msg )
 init _ =
-    ( { pd = Dict.empty }
+    ( { pd = Dict.empty
+      , seed = Random.initialSeed 0
+      }
     , Cmd.none
     )
 
