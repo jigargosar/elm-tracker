@@ -4,6 +4,7 @@ const HtmlWebpackPlugin = require('html-webpack-plugin')
 
 npm init -y
 npm i -D webpack webpack-cli webpack-dev-server html-webpack-plugin style-loader css-loader elm-webpack-loader
+npm i ramda tachyons
 shx rm elm.json
 elm init
 git init

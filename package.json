@@ -4,7 +4,8 @@
   "description": "",
   "main": "webpack.config.js",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "start": "webpack-dev-server",
+    "build": "webpack -p"
   },
   "keywords": [],
   "author": "Jigar Gosar <jigar.gosar@gmail.com>",
@@ -17,5 +18,9 @@
     "webpack": "^4.41.6",
     "webpack-cli": "^3.3.11",
     "webpack-dev-server": "^3.10.3"
+  },
+  "dependencies": {
+    "ramda": "^0.27.0",
+    "tachyons": "^4.11.1"
   }
 }
