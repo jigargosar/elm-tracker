@@ -1,7 +1,9 @@
 module Main exposing (main)
 
-import Html exposing (text)
+import Browser
+import Html exposing (Html)
 import Random exposing (Generator)
+import Time exposing (Posix)
 
 
 type alias Project =
@@ -31,5 +33,81 @@ projectGen title =
         )
 
 
+type alias Activity =
+    { pid : ProjectId
+    , start : Posix
+    }
+
+
+type alias ActivityLog =
+    { pid : ProjectId
+    , start : Posix
+    , end : Posix
+    }
+
+
+
+-- Model
+
+
+type alias Model =
+    {}
+
+
+type alias Flags =
+    ()
+
+
+init : Flags -> ( Model, Cmd Msg )
+init _ =
+    ( {}
+    , Cmd.none
+    )
+
+
+
+-- Update
+
+
+type Msg
+    = NoOp
+
+
+update : Msg -> Model -> ( Model, Cmd Msg )
+update message model =
+    case message of
+        NoOp ->
+            ( model, Cmd.none )
+
+
+subscriptions : Model -> Sub Msg
+subscriptions _ =
+    Sub.batch []
+
+
+
+-- View
+
+
+view : Model -> Html Msg
+view _ =
+    empty
+
+
+empty : Html msg
+empty =
+    Html.text ""
+
+
+
+-- Main
+
+
+main : Program Flags Model Msg
 main =
-    text "Foo"
+    Browser.element
+        { init = init
+        , view = view
+        , update = update
+        , subscriptions = subscriptions
+        }
