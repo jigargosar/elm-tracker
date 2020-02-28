@@ -75,8 +75,8 @@ init _ =
     )
 
 
-createAndInsertProject : String -> Model -> Model
-createAndInsertProject title =
+insertNewProject : String -> Model -> Model
+insertNewProject title =
     stepRandom (projectGen title) insertProject
 
 
