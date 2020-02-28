@@ -71,6 +71,9 @@ init _ =
     ( { pd = Dict.empty
       , seed = Random.initialSeed 0
       }
+        |> insertNewProject "P1"
+        |> insertNewProject "P2"
+        |> insertNewProject "P3"
     , Cmd.none
     )
 
