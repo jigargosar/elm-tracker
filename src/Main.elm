@@ -2,7 +2,7 @@ module Main exposing (main)
 
 import Browser
 import Dict exposing (Dict)
-import Html exposing (Html)
+import Html exposing (Html, div, text)
 import Random exposing (Generator, Seed)
 import Time exposing (Posix)
 
@@ -124,13 +124,18 @@ subscriptions _ =
 
 
 view : Model -> Html Msg
-view _ =
-    empty
+view model =
+    viewProjectList (Dict.values model.pd)
+        |> div []
 
 
-empty : Html msg
-empty =
-    Html.text ""
+viewProjectList : List Project -> List (Html Msg)
+viewProjectList =
+    let
+        vp p =
+            div [] [ text p.title ]
+    in
+    List.map vp
 
 
 
