@@ -126,9 +126,9 @@ subscriptions _ =
 
 view : Model -> Html Msg
 view model =
-    div [ class "measure-wide center ph2 pv2" ]
+    column [ class "measure-wide center ph2 pv2" ]
         [ viewProjectList (Dict.values model.pd)
-            |> div [ class "flex flex-column" ]
+            |> column []
         ]
 
 
