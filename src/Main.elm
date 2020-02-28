@@ -3,6 +3,7 @@ module Main exposing (main)
 import Browser
 import Dict exposing (Dict)
 import Html exposing (Html, div, text)
+import Html.Attributes exposing (class)
 import Random exposing (Generator, Seed)
 import Time exposing (Posix)
 
@@ -125,15 +126,17 @@ subscriptions _ =
 
 view : Model -> Html Msg
 view model =
-    viewProjectList (Dict.values model.pd)
-        |> div []
+    div [ class "measure-wide center ph2 pv2" ]
+        [ viewProjectList (Dict.values model.pd)
+            |> div [ class "flex flex-column" ]
+        ]
 
 
 viewProjectList : List Project -> List (Html Msg)
 viewProjectList =
     let
         vp p =
-            div [] [ text p.title ]
+            div [ class "mv1 pv1" ] [ text p.title ]
     in
     List.map vp
 
