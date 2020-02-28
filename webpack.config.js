@@ -9,12 +9,13 @@ elm init
 git init
 git add .
 git commit -m "Initial Commit"
+
 */
 
 module.exports = (_, config) => {
   const isProd = config.mode === 'production'
   return {
-    entry: "./src/index.js",
+    entry: './src/index.js',
     output: {
       publicPath: '/',
     },
@@ -38,7 +39,7 @@ module.exports = (_, config) => {
           include: /\.css/,
           use: [
             'style-loader',
-            'css-loader'
+            'css-loader',
             // POST CSS
             // { loader: 'css-loader', options: { importLoaders: 1 } },
             // {
