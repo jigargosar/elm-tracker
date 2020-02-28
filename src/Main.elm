@@ -146,6 +146,11 @@ row =
     withClass "flex flex-row"
 
 
+column : List (Html.Attribute msg) -> List (Html msg) -> Html msg
+column =
+    withClass "flex flex-column"
+
+
 withClass : String -> List (Html.Attribute msg) -> List (Html msg) -> Html msg
 withClass cls a =
     div (class cls :: a)
