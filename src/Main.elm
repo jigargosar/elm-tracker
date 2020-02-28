@@ -141,6 +141,16 @@ viewProjectList =
     List.map vp
 
 
+row : List (Html.Attribute msg) -> List (Html msg) -> Html msg
+row =
+    withClass "flex flex-row"
+
+
+withClass : String -> List (Html.Attribute msg) -> List (Html msg) -> Html msg
+withClass cls a =
+    div (class cls :: a)
+
+
 
 -- Main
 
