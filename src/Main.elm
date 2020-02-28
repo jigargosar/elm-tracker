@@ -17,6 +17,11 @@ type ProjectId
     = ProjectId String
 
 
+pidToString : ProjectId -> String
+pidToString (ProjectId str) =
+    str
+
+
 idGen : (String -> id) -> Generator id
 idGen tag =
     Random.int 0 Random.maxInt |> Random.map (String.fromInt >> tag)
@@ -68,6 +73,27 @@ init _ =
       }
     , Cmd.none
     )
+
+
+createAndInsertProject : String -> Model -> Model
+createAndInsertProject title =
+    stepRandom (projectGen title) insertProject
+
+
+insertProject : Project -> Model -> Model
+insertProject project =
+    mapPd (Dict.insert (pidToString project.id) project)
+
+
+mapPd func model =
+    { model | pd = func model.pd }
+
+
+stepRandom : Generator a -> (a -> Model -> Model) -> Model -> Model
+stepRandom ge func model =
+    case Random.step ge model.seed of
+        ( a, seed ) ->
+            func a { model | seed = seed }
 
 
 
