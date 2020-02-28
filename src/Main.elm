@@ -2,7 +2,7 @@ module Main exposing (main)
 
 import Browser
 import Dict exposing (Dict)
-import Html exposing (Html, div, text)
+import Html exposing (Html, text)
 import Html.Attributes exposing (class)
 import Random exposing (Generator, Seed)
 import Time exposing (Posix)
@@ -136,7 +136,7 @@ viewProjectList : List Project -> List (Html Msg)
 viewProjectList =
     let
         vp p =
-            div [ class "mv1 pv1" ] [ text p.title ]
+            row [ class "mv1 pv1" ] [ text p.title ]
     in
     List.map vp
 
@@ -153,7 +153,7 @@ column =
 
 withClass : String -> List (Html.Attribute msg) -> List (Html msg) -> Html msg
 withClass cls a =
-    div (class cls :: a)
+    Html.div (class cls :: a)
 
 
 
