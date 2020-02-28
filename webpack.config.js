@@ -1,4 +1,5 @@
 const HtmlWebpackPlugin = require('html-webpack-plugin')
+const { CleanWebpackPlugin } = require('clean-webpack-plugin')
 
 /*
 
@@ -13,6 +14,7 @@ git commit -m "Initial Commit"
 
 */
 
+// https://webpack.js.org/configuration/
 module.exports = (_, config) => {
   const isProd = config.mode === 'production'
   return {
@@ -23,7 +25,11 @@ module.exports = (_, config) => {
     resolve: {
       extensions: ['.js', '.elm'],
     },
-    plugins: [new HtmlWebpackPlugin({ template: 'src/index.html' })],
+    plugins: [
+      new CleanWebpackPlugin(),
+      new HtmlWebpackPlugin({ template: './src/index.html' }),
+    ],
+
     module: {
       rules: [
         {
@@ -54,6 +60,13 @@ module.exports = (_, config) => {
         },
       ],
     },
+    // https://webpack.js.org/configuration/stats/
+    // stats: 'errors-warnings',
+    stats: {
+      children: false,
+      modules: false,
+    },
+    devtool: isProd ? 'source-map' : 'eval-source-map',
     devServer: {
       historyApiFallback: true,
       hot: true,
