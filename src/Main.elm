@@ -2,7 +2,7 @@ module Main exposing (main)
 
 import Browser
 import Dict exposing (Dict)
-import Html exposing (Html, text)
+import Html exposing (Html, button, text)
 import Html.Attributes exposing (class)
 import Random exposing (Generator, Seed)
 import Time exposing (Posix)
@@ -136,7 +136,10 @@ viewProjectList : List Project -> List (Html Msg)
 viewProjectList =
     let
         vp p =
-            row [ class "mv1 pv1" ] [ text p.title ]
+            row [ class "mv1" ]
+                [ row [ class "pv1 flex-grow-1" ] [ text p.title ]
+                , button [ class "pointer bn pv1 ph2" ] [ text "|>" ]
+                ]
     in
     List.map vp
 
