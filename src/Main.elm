@@ -242,8 +242,10 @@ viewActivity vm =
     in
     column [ class "pv2" ]
         [ row [ class "f4 pv1" ] [ text "Current Activity" ]
-        , row [] [ text vm.title ]
-        , row [] [ text elapsed ]
+        , row [ class "justify-between items-baseline" ]
+            [ row [] [ text vm.title ]
+            , row [] [ text elapsed ]
+            ]
         ]
 
 
