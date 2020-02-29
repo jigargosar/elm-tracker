@@ -234,18 +234,16 @@ type alias ActivityView =
 viewActivity : ActivityView -> Html Msg
 viewActivity vm =
     let
-        dv o =
-            row [] [ Debug.toString o |> text ]
+        elapsed =
+            posixDiff vm.start vm.now
+                |> toFloat
+                |> TypedTime.milliseconds
+                |> TypedTime.toString TypedTime.Seconds
     in
     column [ class "pv2" ]
         [ row [ class "f4 pv1" ] [ text "Current Activity" ]
         , row [] [ text vm.title ]
-        , dv
-            (posixDiff vm.start vm.now
-                |> toFloat
-                |> TypedTime.milliseconds
-                |> TypedTime.toString TypedTime.Seconds
-            )
+        , row [] [ text elapsed ]
         ]
 
 
