@@ -9,6 +9,7 @@ import Html.Extra exposing (viewMaybe)
 import Random exposing (Generator, Seed)
 import Task
 import Time exposing (Posix)
+import TimeTravel.Browser
 import Update.Pipeline exposing (..)
 
 
@@ -263,9 +264,17 @@ withClass cls a =
 -- Main
 
 
-main : Program Flags Model Msg
 main =
-    Browser.element
+    let
+        defaultConfig : TimeTravel.Browser.TimeTravelConfig
+        defaultConfig =
+            TimeTravel.Browser.defaultConfig
+    in
+    TimeTravel.Browser.element
+        Debug.toString
+        Debug.toString
+        { defaultConfig | startToLeft = False, startMinimized = True }
+        --Browser.element
         { init = init
         , view = view
         , update = update
