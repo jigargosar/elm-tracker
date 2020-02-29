@@ -241,8 +241,8 @@ viewActivity vm =
                 |> TypedTime.toString TypedTime.Seconds
     in
     column [ class "pv2" ]
-        [ row [ class "f4 pv1" ] [ text "Current Activity" ]
-        , row [ class "justify-between items-baseline" ]
+        [ row [ class "pv1 f4 " ] [ text "Current Activity" ]
+        , row [ class "mb1 justify-between items-baseline" ]
             [ row [] [ text vm.title ]
             , row [] [ text elapsed ]
             ]
