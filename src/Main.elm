@@ -8,6 +8,7 @@ import Html.Events exposing (onClick)
 import Random exposing (Generator, Seed)
 import Task
 import Time exposing (Posix)
+import Update.Pipeline as UP exposing (..)
 
 
 type alias Project =
@@ -18,6 +19,10 @@ type alias Project =
 
 type ProjectId
     = ProjectId String
+
+
+type alias Pid =
+    ProjectId
 
 
 pidToString : ProjectId -> String
@@ -114,6 +119,17 @@ stepRandom ge func model =
             func a { model | seed = seed }
 
 
+startActivity : Pid -> Posix -> Model -> Model
+startActivity pid posix =
+    Activity pid posix
+        |> Just
+        |> setActivity_
+
+
+setActivity_ a m =
+    { m | activity = a }
+
+
 
 -- Update
 
@@ -125,25 +141,18 @@ type Msg
 
 
 update : Msg -> Model -> ( Model, Cmd Msg )
-update message model =
+update message =
     case message of
         NoOp ->
-            ( model, Cmd.none )
+            save
 
         TrackProject projectId ->
-            ( model
-            , Cmd.batch
-                [ getTime (TrackProjectWithNow projectId)
-                ]
-            )
+            save
+                >> andAddCmd
+                    (getTime (TrackProjectWithNow projectId))
 
         TrackProjectWithNow projectId start ->
-            case findProject projectId model of
-                Just _ ->
-                    ( { model | activity = Just (Activity projectId start) }, Cmd.none )
-
-                Nothing ->
-                    ( model, Cmd.none )
+            startActivity projectId start >> save
 
 
 getTime : (Posix -> msg) -> Cmd msg
