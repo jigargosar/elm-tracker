@@ -10,7 +10,7 @@ import Random exposing (Generator, Seed)
 import Task
 import Time exposing (Posix)
 import TimeTravel.Browser
-import Update.Pipeline exposing (..)
+import Update.Pipeline as U exposing (..)
 
 
 type alias Project =
@@ -101,6 +101,17 @@ init { now } =
         |> insertNewProject "P3"
     , Cmd.none
     )
+        |> U.andThen startFirstActivity
+
+
+startFirstActivity : Model -> ( Model, Cmd Msg )
+startFirstActivity model =
+    case model.pd |> Dict.values |> List.head of
+        Just p ->
+            ( model, getTime (TrackProjectWithNow p.id) )
+
+        Nothing ->
+            ( model, Cmd.none )
 
 
 insertNewProject : String -> Model -> Model
