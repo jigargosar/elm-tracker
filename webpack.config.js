@@ -17,6 +17,7 @@ git commit -m "Initial Commit"
 // https://webpack.js.org/configuration/
 module.exports = (_, config) => {
   const isProd = config.mode === 'production'
+  const isElmDebuggerDisabled = true
   return {
     entry: './src/index.js',
     output: {
@@ -38,7 +39,7 @@ module.exports = (_, config) => {
             //'elm-hot-webpack-loader',
             {
               loader: 'elm-webpack-loader',
-              options: { optimize: isProd, debug: !isProd },
+              options: { optimize: isProd, debug: !isProd && !isElmDebuggerDisabled },
             },
           ],
         },
