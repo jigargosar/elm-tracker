@@ -232,9 +232,15 @@ type alias ActivityView =
 
 viewActivity : ActivityView -> Html Msg
 viewActivity vm =
+    let
+        dv o =
+            row [] [ Debug.toString o |> text ]
+    in
     column [ class "pv2" ]
         [ row [ class "f4 pv1" ] [ text "Current Activity" ]
         , row [] [ text vm.title ]
+        , dv vm.start
+        , dv vm.now
         ]
 
 
