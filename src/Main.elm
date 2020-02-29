@@ -4,7 +4,9 @@ import Browser
 import Dict exposing (Dict)
 import Html exposing (Html, button, text)
 import Html.Attributes exposing (class)
+import Html.Events exposing (onClick)
 import Random exposing (Generator, Seed)
+import Task
 import Time exposing (Posix)
 
 
@@ -59,8 +61,14 @@ type alias ActivityLog =
 
 type alias Model =
     { pd : Dict String Project
+    , activity : Maybe Activity
     , seed : Seed
     }
+
+
+findProject : ProjectId -> Model -> Maybe Project
+findProject projectId model =
+    Dict.get (pidToString projectId) model.pd
 
 
 type alias Flags =
@@ -69,9 +77,15 @@ type alias Flags =
 
 init : Flags -> ( Model, Cmd Msg )
 init _ =
-    ( { pd = Dict.empty
-      , seed = Random.initialSeed 0
-      }
+    let
+        model : Model
+        model =
+            { pd = Dict.empty
+            , seed = Random.initialSeed 0
+            , activity = Nothing
+            }
+    in
+    ( model
         |> insertNewProject "P1"
         |> insertNewProject "P2"
         |> insertNewProject "P3"
@@ -106,6 +120,8 @@ stepRandom ge func model =
 
 type Msg
     = NoOp
+    | TrackProject ProjectId
+    | TrackProjectWithNow ProjectId Posix
 
 
 update : Msg -> Model -> ( Model, Cmd Msg )
@@ -113,6 +129,26 @@ update message model =
     case message of
         NoOp ->
             ( model, Cmd.none )
+
+        TrackProject projectId ->
+            ( model
+            , Cmd.batch
+                [ getTime (TrackProjectWithNow projectId)
+                ]
+            )
+
+        TrackProjectWithNow projectId start ->
+            case findProject projectId model of
+                Just _ ->
+                    ( { model | activity = Just (Activity projectId start) }, Cmd.none )
+
+                Nothing ->
+                    ( model, Cmd.none )
+
+
+getTime : (Posix -> msg) -> Cmd msg
+getTime func =
+    Time.now |> Task.perform func
 
 
 subscriptions : Model -> Sub Msg
@@ -138,7 +174,11 @@ viewProjectList =
         vp p =
             row [ class "mv1" ]
                 [ row [ class "pv1 flex-grow-1" ] [ text p.title ]
-                , button [ class "pointer bn pv1 ph2" ] [ text "|>" ]
+                , button
+                    [ class "pointer bn pv1 ph2"
+                    , onClick <| TrackProject p.id
+                    ]
+                    [ text "|>" ]
                 ]
     in
     List.map vp
