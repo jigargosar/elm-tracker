@@ -5,10 +5,11 @@ import Dict exposing (Dict)
 import Html exposing (Html, button, text)
 import Html.Attributes exposing (class)
 import Html.Events exposing (onClick)
+import Html.Extra exposing (viewMaybe)
 import Random exposing (Generator, Seed)
 import Task
 import Time exposing (Posix)
-import Update.Pipeline as UP exposing (..)
+import Update.Pipeline exposing (..)
 
 
 type alias Project =
@@ -67,6 +68,7 @@ type alias ActivityLog =
 type alias Model =
     { pd : Dict String Project
     , activity : Maybe Activity
+    , now : Posix
     , seed : Seed
     }
 
@@ -77,16 +79,18 @@ findProject projectId model =
 
 
 type alias Flags =
-    {}
+    { now : Int
+    }
 
 
 init : Flags -> ( Model, Cmd Msg )
-init _ =
+init { now } =
     let
         model : Model
         model =
             { pd = Dict.empty
             , seed = Random.initialSeed 0
+            , now = Time.millisToPosix now
             , activity = Nothing
             }
     in
@@ -130,6 +134,10 @@ setActivity_ a m =
     { m | activity = a }
 
 
+setNow now m =
+    { m | now = now }
+
+
 
 -- Update
 
@@ -138,6 +146,7 @@ type Msg
     = NoOp
     | TrackProject ProjectId
     | TrackProjectWithNow ProjectId Posix
+    | GotNow Posix
 
 
 update : Msg -> Model -> ( Model, Cmd Msg )
@@ -154,6 +163,9 @@ update message =
         TrackProjectWithNow projectId start ->
             startActivity projectId start >> save
 
+        GotNow now ->
+            setNow now >> save
+
 
 getTime : (Posix -> msg) -> Cmd msg
 getTime func =
@@ -162,7 +174,9 @@ getTime func =
 
 subscriptions : Model -> Sub Msg
 subscriptions _ =
-    Sub.batch []
+    Sub.batch
+        [ Time.every 1000 GotNow
+        ]
 
 
 
@@ -174,6 +188,43 @@ view model =
     column [ class "measure-wide center ph2 pv2" ]
         [ viewProjectList (Dict.values model.pd)
             |> column []
+        , viewMaybe viewActivity (activityView model)
+        ]
+
+
+activityView : Model -> Maybe ActivityView
+activityView model =
+    case model.activity of
+        Just activity ->
+            case findProject activity.pid model of
+                Just p ->
+                    { pid = activity.pid
+                    , title = p.title
+                    , start = activity.start
+                    , now = model.now
+                    }
+                        |> Just
+
+                Nothing ->
+                    Nothing
+
+        Nothing ->
+            Nothing
+
+
+type alias ActivityView =
+    { pid : ProjectId
+    , title : String
+    , start : Posix
+    , now : Posix
+    }
+
+
+viewActivity : ActivityView -> Html Msg
+viewActivity vm =
+    column [ class "pv2" ]
+        [ row [ class "f4 pv1" ] [ text "Current Activity" ]
+        , row [] [ text vm.title ]
         ]
 
 
