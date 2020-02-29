@@ -196,7 +196,7 @@ subscriptions _ =
 
 view : Model -> Html Msg
 view model =
-    column [ class "measure-wide center ph2 pv2" ]
+    column [ class "measure-narrow center ph2 pv2" ]
         [ viewProjectList (Dict.values model.pd)
             |> column []
         , viewMaybe viewActivity (activityView model)
