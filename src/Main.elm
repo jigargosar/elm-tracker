@@ -10,6 +10,7 @@ import Random exposing (Generator, Seed)
 import Task
 import Time exposing (Posix)
 import TimeTravel.Browser
+import TypedTime
 import Update.Pipeline as U exposing (..)
 
 
@@ -239,9 +240,18 @@ viewActivity vm =
     column [ class "pv2" ]
         [ row [ class "f4 pv1" ] [ text "Current Activity" ]
         , row [] [ text vm.title ]
-        , dv vm.start
-        , dv vm.now
+        , dv
+            (posixDiff vm.start vm.now
+                |> toFloat
+                |> TypedTime.milliseconds
+                |> TypedTime.toString TypedTime.Seconds
+            )
         ]
+
+
+posixDiff : Posix -> Posix -> Int
+posixDiff a b =
+    Time.posixToMillis b - Time.posixToMillis a
 
 
 viewProjectList : List Project -> List (Html Msg)
