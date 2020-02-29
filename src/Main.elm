@@ -246,6 +246,10 @@ viewActivity vm =
             [ row [] [ text vm.title ]
             , row [] [ text elapsed ]
             ]
+        , row [ class "justify-between items-baseline" ]
+            [ row [] []
+            , button [ class "pointer bn pv1 ph2" ] [ text "STOP" ]
+            ]
         ]
 
 
