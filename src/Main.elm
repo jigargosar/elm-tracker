@@ -160,6 +160,7 @@ type Msg
     | TrackProject ProjectId
     | TrackProjectWithNow ProjectId Posix
     | GotNow Posix
+    | StopClicked
 
 
 update : Msg -> Model -> ( Model, Cmd Msg )
@@ -176,6 +177,9 @@ update message =
 
         GotNow now ->
             setNow now >> save
+
+        StopClicked ->
+            setActivity_ Nothing >> save
 
 
 getTime : (Posix -> msg) -> Cmd msg
@@ -248,7 +252,11 @@ viewActivity vm =
             ]
         , row [ class "justify-between items-baseline" ]
             [ row [] []
-            , button [ class "pointer bn pv1 ph2" ] [ text "STOP" ]
+            , button
+                [ class "pointer bn pv1 ph2"
+                , onClick StopClicked
+                ]
+                [ text "STOP" ]
             ]
         ]
 
