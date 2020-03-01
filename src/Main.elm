@@ -190,7 +190,7 @@ init { now } =
         model =
             { projectDict = Dict.empty
             , logDict = Dict.empty
-            , seed = Random.initialSeed 0
+            , seed = Random.initialSeed now
             , nowForView = Time.millisToPosix now
             , activity = Nothing
             }
