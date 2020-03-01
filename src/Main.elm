@@ -115,7 +115,7 @@ startFirstActivity model =
                 (\mp ->
                     case mp of
                         Just p ->
-                            save >> andGetTime (TrackProjectWithNow p.id)
+                            addCmd (getTime (TrackProjectWithNow p.id))
 
                         Nothing ->
                             save
