@@ -343,14 +343,17 @@ trackedView model =
                 Just p ->
                     { pid = activity.pid
                     , title = p.title
-                    , elapsedMillisToday =
+                    , totalMillisToday =
                         let
-                            _ =
+                            millisLoggedToday =
                                 logsForProjectIdOnDate (Date.fromPosix Time.utc model.now)
                                     activity.pid
                                     model.logDict
+                                    |> List.map logDurationInMillis
+                                    |> List.sum
                         in
                         posixDiff activity.start model.now
+                            |> (+) millisLoggedToday
                     , start = activity.start
                     , now = model.now
                     }
@@ -366,7 +369,7 @@ trackedView model =
 type alias ActivityView =
     { pid : ProjectId
     , title : String
-    , elapsedMillisToday : Int
+    , totalMillisToday : Int
     , start : Posix
     , now : Posix
     }
