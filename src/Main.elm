@@ -1,19 +1,16 @@
 module Main exposing (main)
 
-import Basics.Extra exposing (flip, swap)
-import Browser
 import Dict exposing (Dict)
 import Html exposing (Html, button, text)
 import Html.Attributes exposing (class)
 import Html.Events exposing (onClick)
 import Html.Extra exposing (viewMaybe)
-import Maybe.Extra
 import Random exposing (Generator, Seed)
 import Task
 import Time exposing (Posix)
 import TimeTravel.Browser
 import TypedTime
-import Update.Pipeline as U exposing (..)
+import Update.Pipeline exposing (..)
 
 
 type alias Project =
@@ -172,16 +169,11 @@ mapPd func model =
     { model | pd = func model.pd }
 
 
-stepRandom : (a -> { has | seed : Seed } -> b) -> Generator a -> { has | seed : Seed } -> b
+stepRandom : (a -> Model -> b) -> Generator a -> Model -> b
 stepRandom func ge hasSeed =
     case Random.step ge hasSeed.seed of
         ( a, seed ) ->
             func a { hasSeed | seed = seed }
-
-
-insertNewLog : Log -> Model -> Model
-insertNewLog al =
-    mapLogD (Dict.insert (logIdToString al.id) al)
 
 
 logIdToString : LogId -> String
@@ -189,30 +181,20 @@ logIdToString (LogId id) =
     id
 
 
-mapLogD : (Dict String Log -> Dict String Log) -> Model -> Model
-mapLogD func model =
-    { model | logD = func model.logD }
-
-
-logActivity : Activity -> Model -> Model
-logActivity activity =
-    with (.now >> logGen activity) (stepRandom insertNewLog)
-
-
-logMaybeActivity : Maybe Activity -> Model -> Model
-logMaybeActivity maybeActivity model =
-    case maybeActivity of
+logAndClearCurrentActivityIfAny : Model -> Model
+logAndClearCurrentActivityIfAny model =
+    case model.activity of
         Just activity ->
-            logActivity activity model
+            case Random.step (logGen activity model.now) model.seed of
+                ( log, seed ) ->
+                    { model
+                        | activity = Nothing
+                        , logD = Dict.insert (logIdToString log.id) log model.logD
+                        , seed = seed
+                    }
 
         Nothing ->
             model
-
-
-logAndClearCurrentActivityIfAny : Model -> Model
-logAndClearCurrentActivityIfAny model =
-    logMaybeActivity model.activity model
-        |> clearActivity
 
 
 startActivity : Pid -> Posix -> Model -> Model
@@ -229,11 +211,6 @@ setActivity_ a m =
 setActivity : Activity -> Model -> Model
 setActivity =
     Just >> setActivity_
-
-
-clearActivity : Model -> Model
-clearActivity =
-    setActivity_ Nothing
 
 
 setNow now m =
