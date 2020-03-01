@@ -139,7 +139,7 @@ init { now } =
         |> insertNewProject "P3"
     , Cmd.none
     )
-        |> U.andThen startFirstActivity
+        |> andThen startFirstActivity
 
 
 addMaybeCmd : Maybe (Cmd msg) -> a -> ( a, Cmd msg )
