@@ -7,6 +7,7 @@ import Html exposing (Html, button, text)
 import Html.Attributes exposing (class)
 import Html.Events exposing (onClick)
 import Html.Extra exposing (viewMaybe)
+import Maybe.Extra
 import Random exposing (Generator, Seed)
 import Task
 import Time exposing (Posix)
@@ -196,15 +197,8 @@ logActivity activity =
 startActivity : Pid -> Posix -> Model -> Model
 startActivity pid posix =
     with .activity
-        (\ma ->
-            (case ma of
-                Just running ->
-                    logActivity running
-
-                Nothing ->
-                    identity
-            )
-                >> setActivity (Activity pid posix)
+        (Maybe.Extra.unwrap identity logActivity
+            >> (>>) (setActivity (Activity pid posix))
         )
 
 
