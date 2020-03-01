@@ -3,7 +3,7 @@ const { inspect } = require('util')
 const execa = require('execa')
 
 {
-  execa('elm', ['init'], {
+  execa('elmelm', ['init'], {
     input: 'Y\n',
     stdout: 'inherit',
     stderr: 'inherit',
@@ -11,7 +11,7 @@ const execa = require('execa')
     .then(console.log)
     .catch(e => {
       setTimeout(() => {
-        console.error('INSPECT ERROR', inspect(e, true, 100, true))
+        console.error('INSPECT ERROR', inspect(e, false, 0, true))
       }, 1000)
     })
 }
