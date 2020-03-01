@@ -16,7 +16,7 @@ const execa = require('execa')
       console.error('ERROR: ', e.message, e.code)
     }
   }
-  await installPackage('elm/core')
+  await installPackage('elm/svg')
 })()
 
 function installPackage(packageName) {
