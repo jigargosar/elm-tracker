@@ -61,22 +61,22 @@ type alias Activity =
 -- ACTIVITY LOG
 
 
-type ActivityLogId
+type LogId
     = ActivityLogId String
 
 
-type alias ActivityLog =
-    { id : ActivityLogId
+type alias Log =
+    { id : LogId
     , pid : ProjectId
     , start : Posix
     , end : Posix
     }
 
 
-logGen : Activity -> Posix -> Generator ActivityLog
+logGen : Activity -> Posix -> Generator Log
 logGen activity now =
     let
-        initHelp : ActivityLogId -> ActivityLog
+        initHelp : LogId -> Log
         initHelp id =
             { id = id
             , pid = activity.pid
@@ -94,7 +94,7 @@ logGen activity now =
 type alias Model =
     { pd : Dict String Project
     , activity : Maybe Activity
-    , ad : Dict String ActivityLog
+    , logD : Dict String Log
     , now : Posix
     , seed : Seed
     }
@@ -126,7 +126,7 @@ init { now } =
         model : Model
         model =
             { pd = Dict.empty
-            , ad = Dict.empty
+            , logD = Dict.empty
             , seed = Random.initialSeed 0
             , now = Time.millisToPosix now
             , activity = Nothing
@@ -178,19 +178,19 @@ logActivity activity =
     with (.now >> logGen activity) (stepRandom insertNewActivityLog)
 
 
-insertNewActivityLog : ActivityLog -> Model -> Model
+insertNewActivityLog : Log -> Model -> Model
 insertNewActivityLog al =
     mapAd (Dict.insert (alIdToString al.id) al)
 
 
-alIdToString : ActivityLogId -> String
+alIdToString : LogId -> String
 alIdToString (ActivityLogId id) =
     id
 
 
-mapAd : (Dict String ActivityLog -> Dict String ActivityLog) -> Model -> Model
+mapAd : (Dict String Log -> Dict String Log) -> Model -> Model
 mapAd func model =
-    { model | ad = func model.ad }
+    { model | logD = func model.logD }
 
 
 startActivity : Pid -> Posix -> Model -> Model
