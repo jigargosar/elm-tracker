@@ -181,7 +181,7 @@ type alias Model =
     { projectDict : Dict String Project
     , logDict : Dict String Log
     , activity : Maybe Activity
-    , now : Posix
+    , nowForView : Posix
     , seed : Seed
     }
 
@@ -199,7 +199,7 @@ init { now } =
             { projectDict = Dict.empty
             , logDict = Dict.empty
             , seed = Random.initialSeed 0
-            , now = Time.millisToPosix now
+            , nowForView = Time.millisToPosix now
             , activity = Nothing
             }
     in
@@ -277,7 +277,7 @@ type Msg
     | StopClicked
     | StartTrackWithNow ProjectId Posix
     | StopTrackingWithNow Posix
-    | GotNow Posix
+    | GotNowForView Posix
 
 
 update : Msg -> Model -> ( Model, Cmd Msg )
@@ -295,8 +295,8 @@ update message model =
         StopTrackingWithNow now ->
             ( stopTracking now model, Cmd.none )
 
-        GotNow now ->
-            ( { model | now = now }, Cmd.none )
+        GotNowForView nowForView ->
+            ( { model | nowForView = nowForView }, Cmd.none )
 
         StopClicked ->
             ( model, Time.now |> Task.perform StopTrackingWithNow )
@@ -320,7 +320,7 @@ trackProjectIdCmd pid =
 subscriptions : Model -> Sub Msg
 subscriptions _ =
     Sub.batch
-        [ Time.every 1000 GotNow
+        [ Time.every 1000 GotNowForView
         ]
 
 
@@ -354,13 +354,13 @@ trackedView model =
                     , totalMillisToday =
                         let
                             millisLoggedToday =
-                                logsForProjectIdOnDate (Date.fromPosix Time.utc model.now)
+                                logsForProjectIdOnDate (Date.fromPosix Time.utc model.nowForView)
                                     activity.pid
                                     model.logDict
                                     |> List.map logDurationInMillis
                                     |> List.sum
                         in
-                        posixElapsedStartEnd activity.start model.now
+                        posixElapsedStartEnd activity.start model.nowForView
                             |> (+) millisLoggedToday
                     }
                         |> Just
