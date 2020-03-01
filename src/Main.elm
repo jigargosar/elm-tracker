@@ -426,12 +426,9 @@ viewLogsGroupedByDate zone pd allLogs =
                 (row [ class "f4" ] [ text (Date.format "E ddd MMM y" date) ]
                     :: List.map viewProjectEntry list
                 )
-
-        v2 =
-            column [ class "pv2" ]
-                (List.map viewDateGroup logViewsByDateAndThenByProject)
     in
-    v2
+    column [ class "pv2" ]
+        (List.map viewDateGroup logViewsByDateAndThenByProject)
 
 
 trackedView : Model -> Maybe ActivityView
