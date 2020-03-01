@@ -16,10 +16,14 @@ const execa = require('execa')
       console.error('ERROR: ', e.message, e.code)
     }
   }
+  await installPackage('elm/core')
+})()
 
-  await execa('elm', ['install', 'elm/core'], {
+function installPackage(packageName) {
+  console.log('Installing: ' + packageName)
+  return execa('elm', ['install', packageName], {
     input: 'Y\n',
     stdout: 'inherit',
     stderr: 'inherit',
   })
-})()
+}
