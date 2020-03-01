@@ -345,6 +345,7 @@ view model =
         [ viewMaybe viewTracked (trackedView model)
         , viewProjectList (getAllProjects model)
             |> column []
+        , viewLogsGroupedByDate model.here (Dict.values model.logDict)
         , viewDebugList "DEBUG: Log Duration"
             (getAllSortedLogsEntries model
                 |> List.map logDurationInMillis
@@ -352,6 +353,23 @@ view model =
         , viewDebugList "DEBUG: ALL PROJECTS" (getAllProjects model)
         , viewDebugList "DEBUG: ALL LOG ENTRIES" (getAllSortedLogsEntries model)
         ]
+
+
+viewLogsGroupedByDate zone allLogs =
+    let
+        viewDateLogs ( log, restLogs ) =
+            let
+                date =
+                    Date.fromPosix zone log.start
+            in
+            column []
+                [ row [] [ text (Date.toIsoString date) ]
+                ]
+    in
+    allLogs
+        |> List.Extra.gatherEqualsBy (.start >> Date.fromPosix zone)
+        |> List.map viewDateLogs
+        |> column []
 
 
 trackedView : Model -> Maybe ActivityView
