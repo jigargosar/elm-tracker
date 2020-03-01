@@ -355,6 +355,7 @@ view model =
         ]
 
 
+viewLogsGroupedByDate : Zone -> List Log -> Html msg
 viewLogsGroupedByDate zone allLogs =
     let
         viewDateLogs ( log, restLogs ) =
