@@ -388,6 +388,7 @@ viewLogsGroupedByDate zone pd allLogs =
                 |> toLogViewList zone pd
                 |> List.Extra.gatherEqualsBy .startDate
                 |> List.map (\( lv, restLv ) -> ( lv.startDate, lv :: restLv ))
+                |> List.sortBy (Tuple.first >> Date.toRataDie)
 
         viewDateLogs ( log, restLogs ) =
             let
