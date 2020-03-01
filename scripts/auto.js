@@ -1,13 +1,17 @@
-const spawn = require('child_process').spawn
+const { inspect } = require('util')
 
 const execa = require('execa')
 
 {
-  execa('elm', ['init'], { input: 'Y\n', stdout: 'inherit' })
+  execa('elm', ['init'], {
+    input: 'Y\n',
+    stdout: 'inherit',
+    stderr: 'inherit',
+  })
     .then(console.log)
     .catch(e => {
       setTimeout(() => {
-        console.error('ERROR', e)
-      }, 100)
+        console.error('INSPECT ERROR', inspect(e, true, 100, true))
+      }, 1000)
     })
 }
