@@ -196,12 +196,14 @@ init { now } =
             }
     in
     ( model
-        |> insertNewProject "P1"
-        |> insertNewProject "P2"
-        |> insertNewProject "P3"
     , Cmd.none
     )
-        |> andThen startFirstActivity
+        |> andThen
+            (insertNewProject "P1"
+                >> insertNewProject "P2"
+                >> insertNewProject "P3"
+                >> startFirstActivity
+            )
 
 
 getAllSortedLogsEntries : Model -> List Log
