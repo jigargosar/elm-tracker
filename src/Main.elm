@@ -199,12 +199,25 @@ logActivity activity =
     with (.now >> logGen activity) (stepRandom insertNewLog)
 
 
+logMaybeActivity : Maybe Activity -> Model -> Model
+logMaybeActivity maybeActivity model =
+    case maybeActivity of
+        Just activity ->
+            logActivity activity model
+
+        Nothing ->
+            model
+
+
+logCurrentActivityIfAny : Model -> Model
+logCurrentActivityIfAny model =
+    logMaybeActivity model.activity model
+
+
 startActivity : Pid -> Posix -> Model -> Model
 startActivity pid posix =
-    with .activity
-        (Maybe.Extra.unwrap identity logActivity
-            >> (>>) (setActivity (Activity pid posix))
-        )
+    logCurrentActivityIfAny
+        >> setActivity (Activity pid posix)
 
 
 setActivity_ : Maybe Activity -> Model -> Model
