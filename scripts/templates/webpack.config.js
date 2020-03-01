@@ -39,7 +39,10 @@ module.exports = (_, config) => {
             //'elm-hot-webpack-loader',
             {
               loader: 'elm-webpack-loader',
-              options: { optimize: isProd, debug: !isProd && !isElmDebuggerDisabled },
+              options: {
+                optimize: isProd,
+                debug: !isProd && !isElmDebuggerDisabled,
+              },
             },
           ],
         },
