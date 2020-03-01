@@ -1,4 +1,3 @@
-const { inspect } = require('util')
 const DEBUG = false
 const execa = require('execa')
 const pSeries = require('p-series')
@@ -11,14 +10,6 @@ const pSeries = require('p-series')
       stderr: DEBUG ? 'inherit' : 'ignore',
     })
   } catch (e) {
-    if (DEBUG) {
-      if (e.code !== 1) {
-        console.error('ERROR: ', inspect(e, false, 0, true))
-      } else {
-        console.log('elm.json exists')
-      }
-    }
-
     if (e.code !== 1) {
       console.error('ERROR: ', e.message, e.code)
     }
