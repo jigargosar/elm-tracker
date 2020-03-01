@@ -1,5 +1,5 @@
 const { inspect } = require('util')
-
+const DEBUG = false
 const execa = require('execa')
 
 {
@@ -10,7 +10,11 @@ const execa = require('execa')
   })
     .then(console.log)
     .catch(e => {
-      // console.error('ERROR: INSPECTING', inspect(e, false, 0, true))
-      console.error('ERROR: ', e.message)
+      // noinspection PointlessBooleanExpressionJS,BadExpressionStatementJS
+      if (DEBUG) {
+        console.error('ERROR: INSPECTING', inspect(e, false, 0, true))
+      } else {
+        console.error('ERROR: ', e.message)
+      }
     })
 }
