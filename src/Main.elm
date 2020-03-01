@@ -90,8 +90,8 @@ logGen activity now =
 
 
 type alias Model =
-    { pd : Dict String Project
-    , logD : Dict String Log
+    { projectDict : Dict String Project
+    , logDict : Dict String Log
     , activity : Maybe Activity
     , now : Posix
     , seed : Seed
@@ -100,12 +100,12 @@ type alias Model =
 
 getRecentLogs : Model -> List Log
 getRecentLogs =
-    .logD >> Dict.values >> List.sortBy (.end >> Time.posixToMillis)
+    .logDict >> Dict.values >> List.sortBy (.end >> Time.posixToMillis)
 
 
 findProject : ProjectId -> Model -> Maybe Project
 findProject projectId model =
-    Dict.get (pidToString projectId) model.pd
+    Dict.get (pidToString projectId) model.projectDict
 
 
 findFirstProject : Model -> Maybe Project
@@ -115,7 +115,7 @@ findFirstProject =
 
 getAllProjects : Model -> List Project
 getAllProjects =
-    .pd >> Dict.values
+    .projectDict >> Dict.values
 
 
 type alias Flags =
@@ -128,8 +128,8 @@ init { now } =
     let
         model : Model
         model =
-            { pd = Dict.empty
-            , logD = Dict.empty
+            { projectDict = Dict.empty
+            , logDict = Dict.empty
             , seed = Random.initialSeed 0
             , now = Time.millisToPosix now
             , activity = Nothing
@@ -161,7 +161,7 @@ insertNewProject title model =
         ( project, seed ) ->
             { model
                 | activity = Nothing
-                , pd = insertProject project model.pd
+                , projectDict = insertProject project model.projectDict
                 , seed = seed
             }
 
@@ -197,7 +197,7 @@ logAndClearCurrentActivityIfAny model =
                 ( log, seed ) ->
                     { model
                         | activity = Nothing
-                        , logD = insertLog log model.logD
+                        , logDict = insertLog log model.logDict
                         , seed = seed
                     }
 
