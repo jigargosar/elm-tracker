@@ -1,6 +1,6 @@
 module Main exposing (main)
 
-import Basics.Extra exposing (swap)
+import Basics.Extra exposing (flip, swap)
 import Browser
 import Dict exposing (Dict)
 import Html exposing (Html, button, text)
@@ -57,11 +57,34 @@ type alias Activity =
     }
 
 
+
+-- ACTIVITY LOG
+
+
+type ActivityLogId
+    = ActivityLogId String
+
+
 type alias ActivityLog =
-    { pid : ProjectId
+    { id : ActivityLogId
+    , pid : ProjectId
     , start : Posix
     , end : Posix
     }
+
+
+logGen : Activity -> Posix -> Generator ActivityLog
+logGen activity now =
+    let
+        initHelp : ActivityLogId -> ActivityLog
+        initHelp id =
+            { id = id
+            , pid = activity.pid
+            , start = activity.start
+            , end = now
+            }
+    in
+    idGen (ActivityLogId >> initHelp)
 
 
 
@@ -71,6 +94,7 @@ type alias ActivityLog =
 type alias Model =
     { pd : Dict String Project
     , activity : Maybe Activity
+    , ad : Dict String Activity
     , now : Posix
     , seed : Seed
     }
@@ -102,6 +126,7 @@ init { now } =
         model : Model
         model =
             { pd = Dict.empty
+            , ad = Dict.empty
             , seed = Random.initialSeed 0
             , now = Time.millisToPosix now
             , activity = Nothing
@@ -129,7 +154,7 @@ startFirstActivity =
 
 insertNewProject : String -> Model -> Model
 insertNewProject title =
-    stepRandom (projectGen title) insertProject
+    stepRandom insertProject (projectGen title)
 
 
 insertProject : Project -> Model -> Model
@@ -141,11 +166,21 @@ mapPd func model =
     { model | pd = func model.pd }
 
 
-stepRandom : Generator a -> (a -> Model -> Model) -> Model -> Model
-stepRandom ge func model =
-    case Random.step ge model.seed of
+stepRandom : (a -> { has | seed : Seed } -> b) -> Generator a -> { has | seed : Seed } -> b
+stepRandom func ge hasSeed =
+    case Random.step ge hasSeed.seed of
         ( a, seed ) ->
-            func a { model | seed = seed }
+            func a { hasSeed | seed = seed }
+
+
+logActivity : Activity -> Model -> Model
+logActivity activity =
+    with (.now >> logGen activity) (stepRandom insertNewActivityLog)
+
+
+insertNewActivityLog : ActivityLog -> Model -> Model
+insertNewActivityLog activityLog model =
+    model
 
 
 startActivity : Pid -> Posix -> Model -> Model
