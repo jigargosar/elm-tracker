@@ -107,6 +107,19 @@ type alias Activity =
 
 
 
+-- PROJECT DICT
+
+
+type alias ProjectDict =
+    Dict String Project
+
+
+findProject : ProjectId -> ProjectDict -> Maybe Project
+findProject projectId =
+    Dict.get (pidToString projectId)
+
+
+
 -- Model
 
 
@@ -117,10 +130,6 @@ type alias Model =
     , now : Posix
     , seed : Seed
     }
-
-
-type alias ProjectDict =
-    Dict String Project
 
 
 type alias LogDict =
@@ -156,11 +165,6 @@ init { now } =
 getRecentLogs : Model -> List Log
 getRecentLogs =
     .logDict >> Dict.values >> List.sortBy (.end >> Time.posixToMillis)
-
-
-findProject : ProjectId -> ProjectDict -> Maybe Project
-findProject projectId =
-    Dict.get (pidToString projectId)
 
 
 getAllProjects : Model -> List Project
