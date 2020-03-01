@@ -337,7 +337,7 @@ viewTracked vm =
                 |> TypedTime.toString TypedTime.Seconds
     in
     column [ class "pv2" ]
-        [ row [ class "pv1 f4 " ] [ text "Current Activity" ]
+        [ row [ class "pv1 f4 " ] [ text "Tracking Today" ]
         , row [ class "mb1 justify-between items-baseline" ]
             [ row [] [ text vm.title ]
             , row [] [ text elapsed ]
