@@ -88,6 +88,16 @@ logGen activity now =
 
 
 
+-- TRACKED ACTIVITY
+
+
+type alias Activity =
+    { pid : ProjectId
+    , start : Posix
+    }
+
+
+
 -- Model
 
 
@@ -97,12 +107,6 @@ type alias Model =
     , activity : Maybe Activity
     , now : Posix
     , seed : Seed
-    }
-
-
-type alias Activity =
-    { pid : ProjectId
-    , start : Posix
     }
 
 
