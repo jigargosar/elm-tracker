@@ -11,7 +11,7 @@ const execa = require('execa')
     .then(console.log)
     .catch(e => {
       setTimeout(() => {
-        console.error('INSPECT ERROR', inspect(e, false, 0, true))
+        console.error('ERROR: INSPECTING', inspect(e, false, 0, true))
       }, 1000)
     })
 }
