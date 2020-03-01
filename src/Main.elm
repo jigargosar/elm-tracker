@@ -391,8 +391,8 @@ aggregateLogDurationByProject =
         >> List.sortBy (Tuple.second >> negate)
 
 
-aggregateLogsByDate : Zone -> List Log -> List ( Date, List Log )
-aggregateLogsByDate zone =
+gatherLogsByDate : Zone -> List Log -> List ( Date, List Log )
+gatherLogsByDate zone =
     List.Extra.gatherEqualsBy (.start >> Date.fromPosix zone)
         >> List.map (\( f, r ) -> ( Date.fromPosix zone f.start, f :: r ))
         >> List.sortBy (Tuple.first >> Date.toRataDie >> negate)
@@ -408,6 +408,12 @@ aggregateLogDurationByProjectId =
                 )
             )
         >> List.sortBy (Tuple.second >> negate)
+
+
+gatherLogsByDateThenAggregateLogDurationByProjectId : Zone -> List Log -> List ( Date, List ( ProjectId, Int ) )
+gatherLogsByDateThenAggregateLogDurationByProjectId zone =
+    gatherLogsByDate zone
+        >> List.map (Tuple.mapSecond aggregateLogDurationByProjectId)
 
 
 viewLogsGroupedByDate : Zone -> ProjectDict -> List Log -> Html msg
