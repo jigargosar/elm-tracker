@@ -173,11 +173,6 @@ stepRandom func ge hasSeed =
             func a { hasSeed | seed = seed }
 
 
-logActivity : Activity -> Model -> Model
-logActivity activity =
-    with (.now >> logGen activity) (stepRandom insertNewLog)
-
-
 insertNewLog : Log -> Model -> Model
 insertNewLog al =
     mapAd (Dict.insert (alIdToString al.id) al)
@@ -193,11 +188,32 @@ mapAd func model =
     { model | logD = func model.logD }
 
 
+logActivity : Activity -> Model -> Model
+logActivity activity =
+    with (.now >> logGen activity) (stepRandom insertNewLog)
+
+
 startActivity : Pid -> Posix -> Model -> Model
 startActivity pid posix =
-    Activity pid posix
-        |> Just
-        |> setActivity_
+    with .activity
+        (\ma model ->
+            let
+                _ =
+                    Activity pid posix
+                        |> Just
+
+                _ =
+                    (case ma of
+                        Just running ->
+                            logActivity running
+
+                        Nothing ->
+                            identity
+                    )
+                        >> setActivity_ (Activity pid posix |> Just)
+            in
+            model
+        )
 
 
 setActivity_ a m =
