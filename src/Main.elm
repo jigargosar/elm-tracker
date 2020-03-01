@@ -362,14 +362,15 @@ viewLogsGroupedByDate zone allLogs =
                 date =
                     Date.fromPosix zone log.start
             in
-            column []
-                [ row [ class "f4" ] [ text (Date.format "E ddd MMM y" date) ]
-                ]
+            column [ class "pv1" ]
+                (row [ class "f4" ] [ text (Date.format "E ddd MMM y" date) ]
+                    :: viewDebugListItems (log :: restLogs)
+                )
     in
     allLogs
         |> List.Extra.gatherEqualsBy (.start >> Date.fromPosix zone)
         |> List.map viewDateLogs
-        |> column []
+        |> column [ class "pv2" ]
 
 
 trackedView : Model -> Maybe ActivityView
