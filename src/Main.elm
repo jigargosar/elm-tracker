@@ -294,9 +294,8 @@ view model =
         [ viewMaybe viewTracked (trackedView model)
         , viewProjectList (getAllProjects model)
             |> column []
-        , row [] [ text "DEBUG: ALL LOG ENTRIES" ]
-        , viewLogList (getAllSortedLogsEntries model)
-            |> column []
+        , viewDebugList "DEBUG: ALL PROJECTS" (getAllProjects model)
+        , viewDebugList "DEBUG: ALL LOG ENTRIES" (getAllSortedLogsEntries model)
         ]
 
 
@@ -375,13 +374,21 @@ viewProjectList =
     List.map vp
 
 
-viewLogList : List Log -> List (Html Msg)
-viewLogList =
+viewDebugList : String -> List a -> Html msg
+viewDebugList title list =
+    column [ class "pv2" ]
+        (row [ class "pv1 f4" ] [ text title ]
+            :: viewDebugListItems list
+        )
+
+
+viewDebugListItems : List a -> List (Html msg)
+viewDebugListItems =
     let
-        viewHelp log =
-            row [] [ text <| Debug.toString log.pid ]
+        viewDebugListItem item =
+            row [] [ text <| Debug.toString item ]
     in
-    List.map viewHelp
+    List.map viewDebugListItem
 
 
 row : List (Html.Attribute msg) -> List (Html msg) -> Html msg
