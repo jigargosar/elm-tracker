@@ -196,23 +196,15 @@ logActivity activity =
 startActivity : Pid -> Posix -> Model -> Model
 startActivity pid posix =
     with .activity
-        (\ma model ->
-            let
-                _ =
-                    Activity pid posix
-                        |> Just
+        (\ma ->
+            (case ma of
+                Just running ->
+                    logActivity running
 
-                _ =
-                    (case ma of
-                        Just running ->
-                            logActivity running
-
-                        Nothing ->
-                            identity
-                    )
-                        >> setActivity (Activity pid posix)
-            in
-            model
+                Nothing ->
+                    identity
+            )
+                >> setActivity (Activity pid posix)
         )
 
 
