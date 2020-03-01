@@ -388,14 +388,14 @@ aggregateLogDurationByProject =
                 , f :: r |> List.map (.log >> logDurationInMillis) |> List.sum
                 )
             )
-        >> List.sortBy Tuple.second
+        >> List.sortBy (Tuple.second >> negate)
 
 
 viewLogsGroupedByDate : Zone -> ProjectDict -> List Log -> Html msg
 viewLogsGroupedByDate zone pd allLogs =
     let
-        logViewsByDate : List ( Date, List ( Project, Int ) )
-        logViewsByDate =
+        logViewsByDateAndThenByProject : List ( Date, List ( Project, Int ) )
+        logViewsByDateAndThenByProject =
             allLogs
                 |> toLogViewList zone pd
                 |> List.Extra.gatherEqualsBy .startDate
@@ -407,6 +407,16 @@ viewLogsGroupedByDate zone pd allLogs =
                     )
                 |> List.sortBy (Tuple.first >> Date.toRataDie)
                 |> List.map (Tuple.mapSecond aggregateLogDurationByProject)
+
+        viewDateGroup ( date, list ) =
+            column [ class "pv1" ]
+                (row [ class "f4" ] [ text (Date.format "E ddd MMM y" date) ]
+                    :: viewDebugListItems list
+                )
+
+        v2 =
+            column [ class "pv2" ]
+                (List.map viewDateGroup logViewsByDateAndThenByProject)
 
         viewDateLogs ( log, restLogs ) =
             let
@@ -424,7 +434,7 @@ viewLogsGroupedByDate zone pd allLogs =
                 |> List.map viewDateLogs
                 |> column [ class "pv2" ]
     in
-    v1
+    v2
 
 
 trackedView : Model -> Maybe ActivityView
