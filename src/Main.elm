@@ -175,11 +175,11 @@ stepRandom func ge hasSeed =
 
 logActivity : Activity -> Model -> Model
 logActivity activity =
-    with (.now >> logGen activity) (stepRandom insertNewActivityLog)
+    with (.now >> logGen activity) (stepRandom insertNewLog)
 
 
-insertNewActivityLog : Log -> Model -> Model
-insertNewActivityLog al =
+insertNewLog : Log -> Model -> Model
+insertNewLog al =
     mapAd (Dict.insert (alIdToString al.id) al)
 
 
