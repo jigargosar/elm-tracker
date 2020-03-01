@@ -6,6 +6,7 @@ import Html exposing (Html, button, text)
 import Html.Attributes exposing (class)
 import Html.Events exposing (onClick)
 import Html.Extra exposing (viewMaybe)
+import List.Extra
 import Random exposing (Generator, Seed)
 import Task
 import Time exposing (Posix, Zone)
@@ -163,6 +164,16 @@ allPass list a =
 
 is =
     (==)
+
+
+groupLogsByDate : Zone -> LogDict -> List ( Log, List Log )
+groupLogsByDate zone logDict =
+    let
+        logs : List Log
+        logs =
+            Dict.values logDict
+    in
+    List.Extra.gatherEqualsBy (.start >> Date.fromPosix zone) logs
 
 
 
