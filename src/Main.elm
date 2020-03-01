@@ -119,6 +119,24 @@ findProject projectId =
     Dict.get (pidToString projectId)
 
 
+insertProject : Project -> ProjectDict -> ProjectDict
+insertProject project =
+    Dict.insert (pidToString project.id) project
+
+
+
+-- LOG DICT
+
+
+type alias LogDict =
+    Dict String Log
+
+
+insertLog : Log -> LogDict -> LogDict
+insertLog log =
+    Dict.insert (logIdToString log.id) log
+
+
 
 -- Model
 
@@ -130,10 +148,6 @@ type alias Model =
     , now : Posix
     , seed : Seed
     }
-
-
-type alias LogDict =
-    Dict String Log
 
 
 type alias Flags =
@@ -181,16 +195,6 @@ insertNewProject title model =
                 , projectDict = insertProject project model.projectDict
                 , seed = seed
             }
-
-
-insertProject : Project -> ProjectDict -> ProjectDict
-insertProject project =
-    Dict.insert (pidToString project.id) project
-
-
-insertLog : Log -> LogDict -> LogDict
-insertLog log =
-    Dict.insert (logIdToString log.id) log
 
 
 startTracking : ProjectId -> Posix -> Model -> Model
