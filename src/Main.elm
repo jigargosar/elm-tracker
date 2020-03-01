@@ -209,14 +209,15 @@ logMaybeActivity maybeActivity model =
             model
 
 
-logCurrentActivityIfAny : Model -> Model
-logCurrentActivityIfAny model =
+logAndClearCurrentActivityIfAny : Model -> Model
+logAndClearCurrentActivityIfAny model =
     logMaybeActivity model.activity model
+        |> clearActivity
 
 
 startActivity : Pid -> Posix -> Model -> Model
 startActivity pid posix =
-    logCurrentActivityIfAny
+    logAndClearCurrentActivityIfAny
         >> setActivity (Activity pid posix)
 
 
@@ -228,6 +229,11 @@ setActivity_ a m =
 setActivity : Activity -> Model -> Model
 setActivity =
     Just >> setActivity_
+
+
+clearActivity : Model -> Model
+clearActivity =
+    setActivity_ Nothing
 
 
 setNow now m =
