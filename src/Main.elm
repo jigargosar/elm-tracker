@@ -106,26 +106,6 @@ init { now } =
         |> U.andThen startFirstActivity
 
 
-using : (a -> a -> b) -> a -> b
-using fun model =
-    fun model model
-
-
-with : (a -> b) -> (b -> a -> c) -> a -> c
-with extract fun =
-    using (fun << extract)
-
-
-usingJust : (a -> Maybe (a -> b)) -> a -> Maybe b
-usingJust func a =
-    func a |> Maybe.map ((|>) a)
-
-
-withJust : (a -> Maybe b) -> (b -> a -> c) -> a -> Maybe c
-withJust viewFunc fun =
-    usingJust (viewFunc >> Maybe.map fun)
-
-
 addMaybeCmd : Maybe (Cmd msg) -> a -> ( a, Cmd msg )
 addMaybeCmd =
     Maybe.withDefault Cmd.none >> addCmd
@@ -134,19 +114,6 @@ addMaybeCmd =
 startFirstActivity : Model -> ( Model, Cmd Msg )
 startFirstActivity model =
     let
-        foo : Model -> ( Model, Cmd Msg )
-        foo =
-            with
-                (.pd >> Dict.values >> List.head)
-                (\mp ->
-                    case mp of
-                        Just p ->
-                            addCmd (trackProjectWithNowCmd p)
-
-                        Nothing ->
-                            save
-                )
-
         foo2 : Model -> ( Model, Cmd Msg )
         foo2 =
             with (.pd >> Dict.values >> List.head)
