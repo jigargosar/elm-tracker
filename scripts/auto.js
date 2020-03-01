@@ -1,6 +1,7 @@
 const { inspect } = require('util')
 const DEBUG = false
 const execa = require('execa')
+const pSeries = require('p-series')
 
 ;(async () => {
   try {
@@ -16,7 +17,19 @@ const execa = require('execa')
       console.error('ERROR: ', e.message, e.code)
     }
   }
-  await installPackage('elm/svg')
+
+  const packageNames = [
+    //
+    'elm/svg',
+    'elm/json',
+    'elm/random',
+    'elm/time',
+    'elm-community/list-extra',
+    'elm-community/basics-extra',
+    'elm-community/html-extra',
+    'laserpants/elm-update-pipeline',
+  ]
+  await pSeries(packageNames.map(name => () => installPackage(name)))
 })()
 
 function installPackage(packageName) {
