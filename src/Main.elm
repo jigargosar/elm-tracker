@@ -186,8 +186,8 @@ insertLog log =
     Dict.insert (logIdToString log.id) log
 
 
-startActivity : ProjectId -> Posix -> Model -> Model
-startActivity pid posix model =
+startTracking : ProjectId -> Posix -> Model -> Model
+startTracking pid posix model =
     case model.activity of
         Just activity ->
             case Random.step (logGen activity model.now) model.seed of
@@ -204,8 +204,8 @@ startActivity pid posix model =
             }
 
 
-stopActivity : Model -> Model
-stopActivity model =
+stopTracking : Model -> Model
+stopTracking model =
     case model.activity of
         Just activity ->
             case Random.step (logGen activity model.now) model.seed of
@@ -242,13 +242,13 @@ update message model =
             ( model, trackProjectIdCmd pid )
 
         TrackProjectWithNow projectId start ->
-            ( startActivity projectId start model, Cmd.none )
+            ( startTracking projectId start model, Cmd.none )
 
         GotNow now ->
             ( { model | now = now }, Cmd.none )
 
         StopClicked ->
-            ( stopActivity model, Cmd.none )
+            ( stopTracking model, Cmd.none )
 
 
 addMaybeCmd : Maybe (Cmd msg) -> a -> ( a, Cmd msg )
