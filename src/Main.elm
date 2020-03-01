@@ -85,7 +85,7 @@ type alias Log =
 
 logDurationInMillis : Log -> Int
 logDurationInMillis log =
-    posixElapsedStartEnd log.start log.end
+    elapsedMillisFromToPosix log.start log.end
 
 
 logGen : Activity -> Posix -> Generator Log
@@ -352,7 +352,7 @@ trackedView model =
                                     |> List.map logDurationInMillis
                                     |> List.sum
                         in
-                        posixElapsedStartEnd activity.start model.nowForView
+                        elapsedMillisFromToPosix activity.start model.nowForView
                             |> (+) millisLoggedToday
                     }
                         |> Just
@@ -398,8 +398,8 @@ viewTracked vm =
         ]
 
 
-posixElapsedStartEnd : Posix -> Posix -> Int
-posixElapsedStartEnd a b =
+elapsedMillisFromToPosix : Posix -> Posix -> Int
+elapsedMillisFromToPosix a b =
     Time.posixToMillis b - Time.posixToMillis a
 
 
