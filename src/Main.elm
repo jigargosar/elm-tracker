@@ -408,10 +408,23 @@ viewLogsGroupedByDate zone pd allLogs =
                 |> List.sortBy (Tuple.first >> Date.toRataDie)
                 |> List.map (Tuple.mapSecond aggregateLogDurationByProject)
 
+        viewProjectEntry ( project, elapsedMillis ) =
+            let
+                formattedTime =
+                    elapsedMillis
+                        |> toFloat
+                        |> TypedTime.milliseconds
+                        |> TypedTime.toString TypedTime.Seconds
+            in
+            row []
+                [ column [ class "flex-auto" ] [ text project.title ]
+                , column [] [ text formattedTime ]
+                ]
+
         viewDateGroup ( date, list ) =
             column [ class "pv1" ]
                 (row [ class "f4" ] [ text (Date.format "E ddd MMM y" date) ]
-                    :: viewDebugListItems list
+                    :: List.map viewProjectEntry list
                 )
 
         v2 =
