@@ -181,6 +181,15 @@ logIdToString (LogId id) =
     id
 
 
+type alias LogDict =
+    Dict String Log
+
+
+insertLog : Log -> LogDict -> LogDict
+insertLog log =
+    Dict.insert (logIdToString log.id) log
+
+
 logAndClearCurrentActivityIfAny : Model -> Model
 logAndClearCurrentActivityIfAny model =
     case model.activity of
@@ -189,7 +198,7 @@ logAndClearCurrentActivityIfAny model =
                 ( log, seed ) ->
                     { model
                         | activity = Nothing
-                        , logD = Dict.insert (logIdToString log.id) log model.logD
+                        , logD = insertLog log model.logD
                         , seed = seed
                     }
 
