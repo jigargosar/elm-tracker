@@ -363,7 +363,7 @@ viewLogsGroupedByDate zone allLogs =
                     Date.fromPosix zone log.start
             in
             column []
-                [ row [] [ text (Date.toIsoString date) ]
+                [ row [ class "f4" ] [ text (Date.format "E ddd MMM y" date) ]
                 ]
     in
     allLogs
