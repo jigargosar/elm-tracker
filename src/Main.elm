@@ -63,7 +63,7 @@ type alias Activity =
 
 
 type LogId
-    = ActivityLogId String
+    = LogId String
 
 
 type alias Log =
@@ -85,7 +85,7 @@ logGen activity now =
             , end = now
             }
     in
-    idGen (ActivityLogId >> initHelp)
+    idGen (LogId >> initHelp)
 
 
 
@@ -180,7 +180,7 @@ insertNewLog al =
 
 
 alIdToString : LogId -> String
-alIdToString (ActivityLogId id) =
+alIdToString (LogId id) =
     id
 
 
