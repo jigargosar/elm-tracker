@@ -391,6 +391,18 @@ aggregateLogDurationByProject =
         >> List.sortBy (Tuple.second >> negate)
 
 
+aggregateLogDurationByProjectId : List Log -> List ( ProjectId, Int )
+aggregateLogDurationByProjectId =
+    List.Extra.gatherEqualsBy .pid
+        >> List.map
+            (\( f, r ) ->
+                ( f.pid
+                , f :: r |> List.map logDurationInMillis |> List.sum
+                )
+            )
+        >> List.sortBy (Tuple.second >> negate)
+
+
 viewLogsGroupedByDate : Zone -> ProjectDict -> List Log -> Html msg
 viewLogsGroupedByDate zone pd allLogs =
     let
