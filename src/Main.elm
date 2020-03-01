@@ -181,8 +181,8 @@ update message =
         NoOp ->
             save
 
-        TrackProject projectId ->
-            save >> andGetTime (TrackProjectWithNow projectId)
+        TrackProject pid ->
+            save >> andAddCmd (trackProjectIdCmd pid)
 
         TrackProjectWithNow projectId start ->
             startActivity projectId start >> save
@@ -200,8 +200,13 @@ getTime func =
 
 
 trackProjectCmd : Project -> Cmd Msg
-trackProjectCmd p =
-    TrackProjectWithNow p.id |> getTime
+trackProjectCmd =
+    .id >> trackProjectIdCmd
+
+
+trackProjectIdCmd : ProjectId -> Cmd Msg
+trackProjectIdCmd =
+    TrackProjectWithNow >> getTime
 
 
 andGetTime : (Posix -> msg) -> ( a, Cmd msg ) -> ( a, Cmd msg )
