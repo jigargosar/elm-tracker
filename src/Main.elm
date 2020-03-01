@@ -346,6 +346,7 @@ view model =
         [ viewMaybe viewTracked (trackedView model)
         , viewProjectList (getAllProjects model)
             |> column []
+        , viewTimeLine model.here model.projectDict (Dict.values model.logDict)
         , viewLogsGroupedByDate model.here model.projectDict (Dict.values model.logDict)
         , viewDebugList "DEBUG: Log Duration"
             (getAllSortedLogsEntries model
@@ -417,7 +418,7 @@ gatherLogsByDateThenAggregateLogDurationByProjectId zone =
         >> List.map (Tuple.mapSecond aggregateLogDurationByProjectId)
 
 
-viewTimeLine : Zone -> ProjectDict -> List Log -> Html msg
+viewTimeLine : Zone -> ProjectDict -> List Log -> Html Msg
 viewTimeLine zone pd =
     let
         viewProjectEntry ( projectId, durationInMillis ) =
@@ -432,9 +433,14 @@ viewTimeLine zone pd =
                     findProject projectId pd
                         |> Maybe.Extra.unwrap "<project-title-not-found-error>" .title
             in
-            row []
-                [ column [ class "flex-auto" ] [ text projectTitle ]
-                , column [] [ text formattedTime ]
+            row [ class "mv1" ]
+                [ row [ class "pv1 mr2 flex-grow-1" ] [ text projectTitle ]
+                , column [ class "pv1 mr2" ] [ text formattedTime ]
+                , button
+                    [ class "pointer bn pv1 ph2"
+                    , onClick <| TrackProjectClicked projectId
+                    ]
+                    [ text "|>" ]
                 ]
 
         viewDateGroup ( date, projectEntryList ) =
