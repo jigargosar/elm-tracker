@@ -1,4 +1,4 @@
-const DEBUG = false
+const DEBUG = true
 const execa = require('execa')
 const pSeries = require('p-series')
 
