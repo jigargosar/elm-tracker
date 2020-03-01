@@ -143,14 +143,14 @@ insertLog log =
     Dict.insert (logIdToString log.id) log
 
 
-logsForProjectIdOnDate : Date -> ProjectId -> LogDict -> List Log
-logsForProjectIdOnDate date projectId =
+logsForProjectIdOnDate : Zone -> Date -> ProjectId -> LogDict -> List Log
+logsForProjectIdOnDate zone date projectId =
     Dict.values
         >> List.filter
             (allPass
                 [ .pid >> is projectId
                 , .start
-                    >> Date.fromPosix Time.utc
+                    >> Date.fromPosix zone
                     >> Date.isBetween date date
                 ]
             )
@@ -354,7 +354,8 @@ trackedView model =
                     , totalMillisToday =
                         let
                             millisLoggedToday =
-                                logsForProjectIdOnDate (Date.fromPosix Time.utc model.nowForView)
+                                logsForProjectIdOnDate model.here
+                                    (Date.fromPosix model.here model.nowForView)
                                     activity.pid
                                     model.logDict
                                     |> List.map logDurationInMillis
