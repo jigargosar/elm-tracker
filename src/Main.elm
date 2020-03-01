@@ -209,13 +209,6 @@ trackProjectIdCmd =
     TrackProjectWithNow >> performGetTime
 
 
-andGetTime : (Posix -> msg) -> ( a, Cmd msg ) -> ( a, Cmd msg )
-andGetTime func =
-    Time.now
-        |> Task.perform func
-        |> andAddCmd
-
-
 subscriptions : Model -> Sub Msg
 subscriptions _ =
     Sub.batch
