@@ -58,7 +58,7 @@ projectGen title =
 
 
 
--- ACTIVITY LOG
+-- LOG ENTRIES
 
 
 type LogId
