@@ -345,7 +345,7 @@ view model =
         [ viewMaybe viewTracked (trackedView model)
         , viewProjectList (getAllProjects model)
             |> column []
-        , viewLogsGroupedByDate model.here (Dict.values model.logDict)
+        , viewLogsGroupedByDate model.here model.projectDict (Dict.values model.logDict)
         , viewDebugList "DEBUG: Log Duration"
             (getAllSortedLogsEntries model
                 |> List.map logDurationInMillis
@@ -355,9 +355,37 @@ view model =
         ]
 
 
-viewLogsGroupedByDate : Zone -> List Log -> Html msg
-viewLogsGroupedByDate zone allLogs =
+type alias LogView =
+    { log : Log
+    , project : Project
+    , startDate : Date
+    }
+
+
+toLogView : Zone -> ProjectDict -> Log -> Maybe LogView
+toLogView zone pd log =
+    Maybe.map
+        (\project ->
+            { log = log
+            , project = project
+            , startDate = Date.fromPosix zone log.start
+            }
+        )
+        (findProject log.pid pd)
+
+
+toLogViewList : Zone -> ProjectDict -> List Log -> List LogView
+toLogViewList zone pd =
+    List.filterMap (toLogView zone pd)
+
+
+viewLogsGroupedByDate : Zone -> ProjectDict -> List Log -> Html msg
+viewLogsGroupedByDate zone pd allLogs =
     let
+        allLogViews =
+            allLogs
+                |> toLogViewList zone pd
+
         viewDateLogs ( log, restLogs ) =
             let
                 date =
