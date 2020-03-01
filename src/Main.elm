@@ -156,24 +156,23 @@ startFirstActivity =
 
 
 insertNewProject : String -> Model -> Model
-insertNewProject title =
-    stepRandom insertProject (projectGen title)
+insertNewProject title model =
+    case Random.step (projectGen title) model.seed of
+        ( project, seed ) ->
+            { model
+                | activity = Nothing
+                , pd = insertProject project model.pd
+                , seed = seed
+            }
 
 
-insertProject : Project -> Model -> Model
+type alias ProjectDict =
+    Dict String Project
+
+
+insertProject : Project -> ProjectDict -> ProjectDict
 insertProject project =
-    mapPd (Dict.insert (pidToString project.id) project)
-
-
-mapPd func model =
-    { model | pd = func model.pd }
-
-
-stepRandom : (a -> Model -> b) -> Generator a -> Model -> b
-stepRandom func ge hasSeed =
-    case Random.step ge hasSeed.seed of
-        ( a, seed ) ->
-            func a { hasSeed | seed = seed }
+    Dict.insert (pidToString project.id) project
 
 
 logIdToString : LogId -> String
