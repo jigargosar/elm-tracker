@@ -182,7 +182,7 @@ update message =
             save
 
         TrackProject pid ->
-            save >> andAddCmd (trackProjectIdCmd pid)
+            addCmd (trackProjectIdCmd pid)
 
         TrackProjectWithNow projectId start ->
             startActivity projectId start >> save
