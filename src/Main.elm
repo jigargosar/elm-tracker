@@ -124,7 +124,7 @@ addMaybeCmd =
 startFirstActivity : Model -> ( Model, Cmd Msg )
 startFirstActivity =
     with findFirstProject
-        (Maybe.map trackProjectWithNowCmd >> addMaybeCmd)
+        (Maybe.map trackProjectCmd >> addMaybeCmd)
 
 
 insertNewProject : String -> Model -> Model
@@ -199,10 +199,9 @@ getTime func =
     Time.now |> Task.perform func
 
 
-trackProjectWithNowCmd : Project -> Cmd Msg
-trackProjectWithNowCmd p =
-    TrackProjectWithNow p.id
-        |> getTime
+trackProjectCmd : Project -> Cmd Msg
+trackProjectCmd p =
+    TrackProjectWithNow p.id |> getTime
 
 
 andGetTime : (Posix -> msg) -> ( a, Cmd msg ) -> ( a, Cmd msg )
