@@ -58,11 +58,20 @@ projectGen title =
 
 
 
--- LOG ENTRIES
+-- LOG ID
 
 
 type LogId
     = LogId String
+
+
+logIdToString : LogId -> String
+logIdToString (LogId id) =
+    id
+
+
+
+-- LOG ENTRIES
 
 
 type alias Log =
@@ -169,11 +178,6 @@ type alias ProjectDict =
 insertProject : Project -> ProjectDict -> ProjectDict
 insertProject project =
     Dict.insert (pidToString project.id) project
-
-
-logIdToString : LogId -> String
-logIdToString (LogId id) =
-    id
 
 
 type alias LogDict =
