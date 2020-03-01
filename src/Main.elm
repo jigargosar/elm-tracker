@@ -187,6 +187,13 @@ getTime func =
     Time.now |> Task.perform func
 
 
+andWithTime : (Posix -> msg) -> ( a, Cmd msg ) -> ( a, Cmd msg )
+andWithTime func =
+    Time.now
+        |> Task.perform func
+        |> andAddCmd
+
+
 subscriptions : Model -> Sub Msg
 subscriptions _ =
     Sub.batch
