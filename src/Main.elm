@@ -234,20 +234,20 @@ insertNewProject title model =
 
 
 startTracking : ProjectId -> Posix -> Model -> Model
-startTracking pid posix model =
+startTracking pid now model =
     case model.activity of
         Just activity ->
-            case Random.step (logGen activity model.now) model.seed of
+            case Random.step (logGen activity now) model.seed of
                 ( log, seed ) ->
                     { model
-                        | activity = Just (Activity pid posix)
+                        | activity = Just (Activity pid now)
                         , logDict = insertLog log model.logDict
                         , seed = seed
                     }
 
         Nothing ->
             { model
-                | activity = Just (Activity pid posix)
+                | activity = Just (Activity pid now)
             }
 
 
