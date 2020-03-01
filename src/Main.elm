@@ -291,9 +291,9 @@ subscriptions _ =
 view : Model -> Html Msg
 view model =
     column [ class "measure-narrow center ph2 pv2" ]
-        [ viewProjectList (getAllProjects model)
+        [ viewMaybe viewActivity (activityView model)
+        , viewProjectList (getAllProjects model)
             |> column []
-        , viewMaybe viewActivity (activityView model)
         , row [] [ text "Recent LOGS" ]
         , viewLogList (getRecentLogs model)
             |> column []
