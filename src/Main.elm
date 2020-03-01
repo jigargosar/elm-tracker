@@ -115,9 +115,9 @@ getRecentLogs =
     .logDict >> Dict.values >> List.sortBy (.end >> Time.posixToMillis)
 
 
-findProject : ProjectId -> Model -> Maybe Project
-findProject projectId model =
-    Dict.get (pidToString projectId) model.projectDict
+findProject : ProjectId -> ProjectDict -> Maybe Project
+findProject projectId =
+    Dict.get (pidToString projectId)
 
 
 findFirstProject : Model -> Maybe Project
@@ -297,7 +297,7 @@ activityView : Model -> Maybe ActivityView
 activityView model =
     case model.activity of
         Just activity ->
-            case findProject activity.pid model of
+            case findProject activity.pid model.projectDict of
                 Just p ->
                     { pid = activity.pid
                     , title = p.title
