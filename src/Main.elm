@@ -194,9 +194,9 @@ update message =
             setActivity_ Nothing >> save
 
 
-getTime : (Posix -> msg) -> Cmd msg
-getTime func =
-    Time.now |> Task.perform func
+performGetTime : (Posix -> msg) -> Cmd msg
+performGetTime func =
+    Task.perform func Time.now
 
 
 trackProjectCmd : Project -> Cmd Msg
@@ -206,7 +206,7 @@ trackProjectCmd =
 
 trackProjectIdCmd : ProjectId -> Cmd Msg
 trackProjectIdCmd =
-    TrackProjectWithNow >> getTime
+    TrackProjectWithNow >> performGetTime
 
 
 andGetTime : (Posix -> msg) -> ( a, Cmd msg ) -> ( a, Cmd msg )
