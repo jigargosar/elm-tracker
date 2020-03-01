@@ -261,14 +261,9 @@ startFirstActivity model =
             ( model, Cmd.none )
 
 
-performGetTime : (Posix -> msg) -> Cmd msg
-performGetTime func =
-    Task.perform func Time.now
-
-
 trackProjectIdCmd : ProjectId -> Cmd Msg
-trackProjectIdCmd =
-    TrackProjectWithNow >> performGetTime
+trackProjectIdCmd pid =
+    Task.perform (TrackProjectWithNow pid) Time.now
 
 
 subscriptions : Model -> Sub Msg
