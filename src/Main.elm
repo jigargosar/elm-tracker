@@ -251,11 +251,11 @@ startTracking pid now model =
             }
 
 
-stopTracking : Model -> Model
-stopTracking model =
+stopTracking : Posix -> Model -> Model
+stopTracking now model =
     case model.activity of
         Just activity ->
-            case Random.step (logGen activity model.now) model.seed of
+            case Random.step (logGen activity now) model.seed of
                 ( log, seed ) ->
                     { model
                         | activity = Nothing
@@ -274,9 +274,10 @@ stopTracking model =
 type Msg
     = NoOp
     | TrackProjectClicked ProjectId
-    | TrackProjectWithNow ProjectId Posix
-    | GotNow Posix
     | StopClicked
+    | StartTrackWithNow ProjectId Posix
+    | StopTrackingWithNow Posix
+    | GotNow Posix
 
 
 update : Msg -> Model -> ( Model, Cmd Msg )
@@ -288,14 +289,17 @@ update message model =
         TrackProjectClicked pid ->
             ( model, trackProjectIdCmd pid )
 
-        TrackProjectWithNow projectId start ->
+        StartTrackWithNow projectId start ->
             ( startTracking projectId start model, Cmd.none )
+
+        StopTrackingWithNow now ->
+            ( stopTracking now model, Cmd.none )
 
         GotNow now ->
             ( { model | now = now }, Cmd.none )
 
         StopClicked ->
-            ( stopTracking model, Cmd.none )
+            ( model, Time.now |> Task.perform StopTrackingWithNow )
 
 
 startFirstActivity : Model -> ( Model, Cmd Msg )
@@ -310,7 +314,7 @@ startFirstActivity model =
 
 trackProjectIdCmd : ProjectId -> Cmd Msg
 trackProjectIdCmd pid =
-    Task.perform (TrackProjectWithNow pid) Time.now
+    Task.perform (StartTrackWithNow pid) Time.now
 
 
 subscriptions : Model -> Sub Msg
