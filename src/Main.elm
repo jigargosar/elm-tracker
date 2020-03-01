@@ -94,7 +94,7 @@ logGen activity now =
 type alias Model =
     { pd : Dict String Project
     , activity : Maybe Activity
-    , ad : Dict String Activity
+    , ad : Dict String ActivityLog
     , now : Posix
     , seed : Seed
     }
@@ -179,8 +179,18 @@ logActivity activity =
 
 
 insertNewActivityLog : ActivityLog -> Model -> Model
-insertNewActivityLog activityLog model =
-    model
+insertNewActivityLog al =
+    mapAd (Dict.insert (alIdToString al.id) al)
+
+
+alIdToString : ActivityLogId -> String
+alIdToString (ActivityLogId id) =
+    id
+
+
+mapAd : (Dict String ActivityLog -> Dict String ActivityLog) -> Model -> Model
+mapAd func model =
+    { model | ad = func model.ad }
 
 
 startActivity : Pid -> Posix -> Model -> Model
