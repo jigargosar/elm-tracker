@@ -22,6 +22,7 @@
   },
   "dependencies": {
     "ramda": "^0.27.0",
-    "tachyons": "^4.11.1"
+    "tachyons": "^4.11.1",
+    "execa": "latest"
   }
 }
