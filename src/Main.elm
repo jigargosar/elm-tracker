@@ -176,7 +176,7 @@ stepRandom func ge hasSeed =
 
 insertNewLog : Log -> Model -> Model
 insertNewLog al =
-    mapAd (Dict.insert (logIdToString al.id) al)
+    mapLogD (Dict.insert (logIdToString al.id) al)
 
 
 logIdToString : LogId -> String
@@ -184,8 +184,8 @@ logIdToString (LogId id) =
     id
 
 
-mapAd : (Dict String Log -> Dict String Log) -> Model -> Model
-mapAd func model =
+mapLogD : (Dict String Log -> Dict String Log) -> Model -> Model
+mapLogD func model =
     { model | logD = func model.logD }
 
 
