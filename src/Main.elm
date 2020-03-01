@@ -115,7 +115,7 @@ startFirstActivity model =
                 (\mp ->
                     case mp of
                         Just p ->
-                            addCmd (getTime (TrackProjectWithNow p.id))
+                            addCmd (trackProjectWithNowCmd p)
 
                         Nothing ->
                             save
@@ -200,6 +200,12 @@ update message =
 getTime : (Posix -> msg) -> Cmd msg
 getTime func =
     Time.now |> Task.perform func
+
+
+trackProjectWithNowCmd : Project -> Cmd Msg
+trackProjectWithNowCmd p =
+    TrackProjectWithNow p.id
+        |> getTime
 
 
 andGetTime : (Posix -> msg) -> ( a, Cmd msg ) -> ( a, Cmd msg )
