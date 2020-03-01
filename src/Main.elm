@@ -307,6 +307,7 @@ trackedView model =
                 Just p ->
                     { pid = activity.pid
                     , title = p.title
+                    , elapsedMillisToday = posixDiff activity.start model.now
                     , start = activity.start
                     , now = model.now
                     }
@@ -322,6 +323,7 @@ trackedView model =
 type alias ActivityView =
     { pid : ProjectId
     , title : String
+    , elapsedMillisToday : Int
     , start : Posix
     , now : Posix
     }
