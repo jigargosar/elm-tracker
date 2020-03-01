@@ -85,7 +85,7 @@ type alias Log =
 
 logDurationInMillis : Log -> Int
 logDurationInMillis log =
-    posixDiff log.end log.start
+    posixElapsedStartEnd log.start log.end
 
 
 logGen : Activity -> Posix -> Generator Log
@@ -330,6 +330,10 @@ view model =
         [ viewMaybe viewTracked (trackedView model)
         , viewProjectList (getAllProjects model)
             |> column []
+        , viewDebugList "DEBUG: Log Duration"
+            (getAllSortedLogsEntries model
+                |> List.map logDurationInMillis
+            )
         , viewDebugList "DEBUG: ALL PROJECTS" (getAllProjects model)
         , viewDebugList "DEBUG: ALL LOG ENTRIES" (getAllSortedLogsEntries model)
         ]
@@ -352,10 +356,8 @@ trackedView model =
                                     |> List.map logDurationInMillis
                                     |> List.sum
                         in
-                        posixDiff activity.start model.now
+                        posixElapsedStartEnd activity.start model.now
                             |> (+) millisLoggedToday
-                    , start = activity.start
-                    , now = model.now
                     }
                         |> Just
 
@@ -370,16 +372,15 @@ type alias ActivityView =
     { pid : ProjectId
     , title : String
     , totalMillisToday : Int
-    , start : Posix
-    , now : Posix
     }
 
 
 viewTracked : ActivityView -> Html Msg
 viewTracked vm =
     let
+        elapsed : String
         elapsed =
-            posixDiff vm.start vm.now
+            vm.totalMillisToday
                 |> toFloat
                 |> TypedTime.milliseconds
                 |> TypedTime.toString TypedTime.Seconds
@@ -401,8 +402,8 @@ viewTracked vm =
         ]
 
 
-posixDiff : Posix -> Posix -> Int
-posixDiff a b =
+posixElapsedStartEnd : Posix -> Posix -> Int
+posixElapsedStartEnd a b =
     Time.posixToMillis b - Time.posixToMillis a
 
 
