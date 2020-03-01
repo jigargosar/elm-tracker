@@ -107,12 +107,27 @@ init { now } =
 
 startFirstActivity : Model -> ( Model, Cmd Msg )
 startFirstActivity model =
+    let
+        foo : Model -> ( Model, Cmd Msg )
+        foo =
+            with
+                (.pd >> Dict.values >> List.head)
+                (\mp ->
+                    case mp of
+                        Just p ->
+                            save >> andGetTime (TrackProjectWithNow p.id)
+
+                        Nothing ->
+                            save
+                )
+    in
     case model.pd |> Dict.values |> List.head of
         Just p ->
-            ( model, getTime (TrackProjectWithNow p.id) )
+            save model
+                |> andGetTime (TrackProjectWithNow p.id)
 
         Nothing ->
-            ( model, Cmd.none )
+            save model
 
 
 insertNewProject : String -> Model -> Model
