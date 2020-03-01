@@ -351,7 +351,7 @@ trackedView model =
                 Just p ->
                     { pid = activity.pid
                     , title = p.title
-                    , totalMillisToday =
+                    , millisTrackedToday =
                         let
                             millisLoggedToday =
                                 logsForProjectIdOnDate model.here
@@ -376,7 +376,7 @@ trackedView model =
 type alias ActivityView =
     { pid : ProjectId
     , title : String
-    , totalMillisToday : Int
+    , millisTrackedToday : Int
     }
 
 
@@ -385,7 +385,7 @@ viewTracked vm =
     let
         elapsed : String
         elapsed =
-            vm.totalMillisToday
+            vm.millisTrackedToday
                 |> toFloat
                 |> TypedTime.milliseconds
                 |> TypedTime.toString TypedTime.Seconds
