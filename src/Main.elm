@@ -1,5 +1,6 @@
 module Main exposing (main)
 
+import Basics.Extra exposing (swap)
 import Browser
 import Dict exposing (Dict)
 import Html exposing (Html, button, text)
@@ -125,6 +126,11 @@ withJust viewFunc fun =
     usingJust (viewFunc >> Maybe.map fun)
 
 
+addMaybeCmd : Maybe (Cmd msg) -> a -> ( a, Cmd msg )
+addMaybeCmd =
+    Maybe.withDefault Cmd.none >> addCmd
+
+
 startFirstActivity : Model -> ( Model, Cmd Msg )
 startFirstActivity model =
     let
@@ -140,6 +146,15 @@ startFirstActivity model =
                         Nothing ->
                             save
                 )
+
+        foo2 : Model -> ( Model, Cmd Msg )
+        foo2 =
+            with (.pd >> Dict.values >> List.head)
+                (Maybe.map trackProjectWithNowCmd >> addMaybeCmd)
+
+        --foo3 : Model -> ( Model, Cmd Msg )
+        --foo3 =
+        --    with foo2 (\mb m -> Maybe.withDefault (save m) mb)
     in
     case model.pd |> Dict.values |> List.head of
         Just p ->
