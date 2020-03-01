@@ -119,19 +119,12 @@ type alias Model =
     }
 
 
-getRecentLogs : Model -> List Log
-getRecentLogs =
-    .logDict >> Dict.values >> List.sortBy (.end >> Time.posixToMillis)
+type alias ProjectDict =
+    Dict String Project
 
 
-findProject : ProjectId -> ProjectDict -> Maybe Project
-findProject projectId =
-    Dict.get (pidToString projectId)
-
-
-getAllProjects : Model -> List Project
-getAllProjects =
-    .projectDict >> Dict.values
+type alias LogDict =
+    Dict String Log
 
 
 type alias Flags =
@@ -160,6 +153,21 @@ init { now } =
         |> andThen startFirstActivity
 
 
+getRecentLogs : Model -> List Log
+getRecentLogs =
+    .logDict >> Dict.values >> List.sortBy (.end >> Time.posixToMillis)
+
+
+findProject : ProjectId -> ProjectDict -> Maybe Project
+findProject projectId =
+    Dict.get (pidToString projectId)
+
+
+getAllProjects : Model -> List Project
+getAllProjects =
+    .projectDict >> Dict.values
+
+
 insertNewProject : String -> Model -> Model
 insertNewProject title model =
     case Random.step (projectGen title) model.seed of
@@ -171,17 +179,9 @@ insertNewProject title model =
             }
 
 
-type alias ProjectDict =
-    Dict String Project
-
-
 insertProject : Project -> ProjectDict -> ProjectDict
 insertProject project =
     Dict.insert (pidToString project.id) project
-
-
-type alias LogDict =
-    Dict String Log
 
 
 insertLog : Log -> LogDict -> LogDict
