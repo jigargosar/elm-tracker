@@ -242,13 +242,13 @@ update message model =
             ( model, trackProjectIdCmd pid )
 
         TrackProjectWithNow projectId start ->
-            ( model |> startActivity projectId start, Cmd.none )
+            ( startActivity projectId start model, Cmd.none )
 
         GotNow now ->
             ( { model | now = now }, Cmd.none )
 
         StopClicked ->
-            ( model |> stopActivity, Cmd.none )
+            ( stopActivity model, Cmd.none )
 
 
 addMaybeCmd : Maybe (Cmd msg) -> a -> ( a, Cmd msg )
