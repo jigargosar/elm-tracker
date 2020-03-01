@@ -379,7 +379,7 @@ toLogViewList zone pd =
     List.filterMap (toLogView zone pd)
 
 
-aggregateLogDurationByProject : List LogView -> List ( Project, Int )
+aggregateLogDurationByProject : List { a | project : Project, log : Log } -> List ( Project, Int )
 aggregateLogDurationByProject =
     List.Extra.gatherEqualsBy (.project >> .id)
         >> List.map
