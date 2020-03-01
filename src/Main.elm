@@ -207,6 +207,7 @@ setActivity_ a m =
     { m | activity = a }
 
 
+setActivity : Activity -> Model -> Model
 setActivity =
     Just >> setActivity_
 
