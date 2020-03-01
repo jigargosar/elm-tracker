@@ -14,7 +14,9 @@
             "elm/time": "1.0.0",
             "elm-community/basics-extra": "4.1.0",
             "elm-community/html-extra": "3.3.0",
+            "elm-community/list-extra": "8.2.3",
             "elm-community/maybe-extra": "5.1.0",
+            "justinmimbs/date": "3.2.0",
             "jxxcarlson/elm-typed-time": "1.2.0",
             "laserpants/elm-update-pipeline": "1.1.0",
             "savardd/elm-time-travel": "2.0.0"
@@ -28,7 +30,6 @@
             "elm/svg": "1.0.1",
             "elm/url": "1.0.0",
             "elm/virtual-dom": "1.0.2",
-            "elm-community/list-extra": "8.2.3",
             "jinjor/elm-diff": "1.0.6",
             "pilatch/flip": "1.0.0"
         }

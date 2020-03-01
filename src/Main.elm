@@ -1,5 +1,6 @@
 module Main exposing (main)
 
+import Date exposing (Date)
 import Dict exposing (Dict)
 import Html exposing (Html, button, text)
 import Html.Attributes exposing (class)
@@ -148,6 +149,24 @@ millisLoggedForProjectId projectId =
         >> List.filter (.pid >> is projectId)
         >> List.map logDurationInMillis
         >> List.sum
+
+
+logsForProjectIdOnDate : Date -> ProjectId -> LogDict -> List Log
+logsForProjectIdOnDate date projectId =
+    Dict.values
+        >> List.filter
+            (allPass
+                [ .pid >> is projectId
+                , .start
+                    >> Date.fromPosix Time.utc
+                    >> Date.isBetween date date
+                ]
+            )
+
+
+allPass : List (a -> Bool) -> a -> Bool
+allPass list a =
+    List.all ((|>) a) list
 
 
 is =
