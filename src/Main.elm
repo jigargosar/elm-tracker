@@ -143,14 +143,6 @@ insertLog log =
     Dict.insert (logIdToString log.id) log
 
 
-millisLoggedForProjectId : ProjectId -> LogDict -> Int
-millisLoggedForProjectId projectId =
-    Dict.values
-        >> List.filter (.pid >> is projectId)
-        >> List.map logDurationInMillis
-        >> List.sum
-
-
 logsForProjectIdOnDate : Date -> ProjectId -> LogDict -> List Log
 logsForProjectIdOnDate date projectId =
     Dict.values
