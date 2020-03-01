@@ -12,7 +12,7 @@ const execa = require('execa')
   } catch (e) {
     if (DEBUG) {
       console.error('ERROR: INSPECTING', inspect(e, false, 0, true))
-    } else {
+    } else if (e.code !== 1) {
       console.error('ERROR: ', e.message, e.code)
     }
   }
