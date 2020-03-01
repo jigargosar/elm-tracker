@@ -186,8 +186,25 @@ insertLog log =
     Dict.insert (logIdToString log.id) log
 
 
-logAndClearCurrentActivityIfAny : Model -> Model
-logAndClearCurrentActivityIfAny model =
+startActivity : ProjectId -> Posix -> Model -> Model
+startActivity pid posix model =
+    case model.activity of
+        Just activity ->
+            case Random.step (logGen activity model.now) model.seed of
+                ( log, seed ) ->
+                    { model
+                        | activity = Just (Activity pid posix)
+                        , logDict = insertLog log model.logDict
+                        , seed = seed
+                    }
+
+        Nothing ->
+            { model
+                | activity = Just (Activity pid posix)
+            }
+
+
+stopActivity model =
     case model.activity of
         Just activity ->
             case Random.step (logGen activity model.now) model.seed of
@@ -199,39 +216,7 @@ logAndClearCurrentActivityIfAny model =
                     }
 
         Nothing ->
-            model
-
-
-startActivity : ProjectId -> Posix -> Model -> Model
-startActivity pid posix model =
-    (case model.activity of
-        Just activity ->
-            case Random.step (logGen activity model.now) model.seed of
-                ( log, seed ) ->
-                    { model
-                        | activity = Nothing
-                        , logDict = insertLog log model.logDict
-                        , seed = seed
-                    }
-
-        Nothing ->
-            model
-    )
-        |> setActivity (Activity pid posix)
-
-
-setActivity_ : Maybe Activity -> Model -> Model
-setActivity_ a m =
-    { m | activity = a }
-
-
-setActivity : Activity -> Model -> Model
-setActivity =
-    Just >> setActivity_
-
-
-setNow now m =
-    { m | now = now }
+            { model | activity = Nothing }
 
 
 
@@ -247,22 +232,22 @@ type Msg
 
 
 update : Msg -> Model -> ( Model, Cmd Msg )
-update message =
+update message model =
     case message of
         NoOp ->
-            save
+            ( model, Cmd.none )
 
         TrackProjectClicked pid ->
-            addCmd (trackProjectIdCmd pid)
+            ( model, trackProjectIdCmd pid )
 
         TrackProjectWithNow projectId start ->
-            startActivity projectId start >> save
+            ( model |> startActivity projectId start, Cmd.none )
 
         GotNow now ->
-            setNow now >> save
+            ( { model | now = now }, Cmd.none )
 
         StopClicked ->
-            setActivity_ Nothing >> save
+            ( model |> stopActivity, Cmd.none )
 
 
 addMaybeCmd : Maybe (Cmd msg) -> a -> ( a, Cmd msg )
