@@ -422,7 +422,7 @@ viewLogsGroupedByDate zone pd allLogs =
                 ]
 
         viewDateGroup ( date, list ) =
-            column [ class "pv1" ]
+            column [ class "pv2" ]
                 (row [ class "f4" ] [ text (Date.format "E ddd MMM y" date) ]
                     :: List.map viewProjectEntry list
                 )
