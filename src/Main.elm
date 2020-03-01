@@ -81,6 +81,16 @@ findProject projectId model =
     Dict.get (pidToString projectId) model.pd
 
 
+findFirstProject : Model -> Maybe Project
+findFirstProject =
+    getAllProjects >> List.head
+
+
+getAllProjects : Model -> List Project
+getAllProjects =
+    .pd >> Dict.values
+
+
 type alias Flags =
     { now : Int
     }
@@ -112,24 +122,9 @@ addMaybeCmd =
 
 
 startFirstActivity : Model -> ( Model, Cmd Msg )
-startFirstActivity model =
-    let
-        foo2 : Model -> ( Model, Cmd Msg )
-        foo2 =
-            with (.pd >> Dict.values >> List.head)
-                (Maybe.map trackProjectWithNowCmd >> addMaybeCmd)
-
-        --foo3 : Model -> ( Model, Cmd Msg )
-        --foo3 =
-        --    with foo2 (\mb m -> Maybe.withDefault (save m) mb)
-    in
-    case model.pd |> Dict.values |> List.head of
-        Just p ->
-            save model
-                |> andGetTime (TrackProjectWithNow p.id)
-
-        Nothing ->
-            save model
+startFirstActivity =
+    with findFirstProject
+        (Maybe.map trackProjectWithNowCmd >> addMaybeCmd)
 
 
 insertNewProject : String -> Model -> Model
@@ -231,7 +226,7 @@ subscriptions _ =
 view : Model -> Html Msg
 view model =
     column [ class "measure-narrow center ph2 pv2" ]
-        [ viewProjectList (Dict.values model.pd)
+        [ viewProjectList (getAllProjects model)
             |> column []
         , viewMaybe viewActivity (activityView model)
         ]
