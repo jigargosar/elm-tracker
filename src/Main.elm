@@ -222,7 +222,7 @@ setNow now m =
 
 type Msg
     = NoOp
-    | TrackProject ProjectId
+    | TrackProjectClicked ProjectId
     | TrackProjectWithNow ProjectId Posix
     | GotNow Posix
     | StopClicked
@@ -234,7 +234,7 @@ update message =
         NoOp ->
             save
 
-        TrackProject pid ->
+        TrackProjectClicked pid ->
             addCmd (trackProjectIdCmd pid)
 
         TrackProjectWithNow projectId start ->
@@ -349,7 +349,7 @@ viewProjectList =
                 [ row [ class "pv1 flex-grow-1" ] [ text p.title ]
                 , button
                     [ class "pointer bn pv1 ph2"
-                    , onClick <| TrackProject p.id
+                    , onClick <| TrackProjectClicked p.id
                     ]
                     [ text "|>" ]
                 ]
