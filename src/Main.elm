@@ -348,9 +348,9 @@ trackedView model =
     case model.activity of
         Just activity ->
             case findProject activity.pid model.projectDict of
-                Just p ->
+                Just project ->
                     { pid = activity.pid
-                    , title = p.title
+                    , title = project.title
                     , millisTrackedToday =
                         let
                             millisLoggedToday =
