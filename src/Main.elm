@@ -251,15 +251,14 @@ update message model =
             ( stopTracking model, Cmd.none )
 
 
-addMaybeCmd : Maybe (Cmd msg) -> a -> ( a, Cmd msg )
-addMaybeCmd =
-    Maybe.withDefault Cmd.none >> addCmd
-
-
 startFirstActivity : Model -> ( Model, Cmd Msg )
-startFirstActivity =
-    with findFirstProject
-        (Maybe.map trackProjectCmd >> addMaybeCmd)
+startFirstActivity model =
+    case findFirstProject model of
+        Just p ->
+            ( model, trackProjectCmd p )
+
+        Nothing ->
+            ( model, Cmd.none )
 
 
 performGetTime : (Posix -> msg) -> Cmd msg
