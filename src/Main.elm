@@ -7,6 +7,7 @@ import Html.Attributes exposing (class)
 import Html.Events exposing (onClick)
 import Html.Extra exposing (viewMaybe)
 import List.Extra
+import Maybe.Extra
 import Random exposing (Generator, Seed)
 import Task
 import Time exposing (Posix, Zone)
@@ -414,6 +415,37 @@ gatherLogsByDateThenAggregateLogDurationByProjectId : Zone -> List Log -> List (
 gatherLogsByDateThenAggregateLogDurationByProjectId zone =
     gatherLogsByDate zone
         >> List.map (Tuple.mapSecond aggregateLogDurationByProjectId)
+
+
+viewTimeLine : Zone -> ProjectDict -> List Log -> Html msg
+viewTimeLine zone pd =
+    let
+        viewProjectEntry ( projectId, durationInMillis ) =
+            let
+                formattedTime =
+                    durationInMillis
+                        |> toFloat
+                        |> TypedTime.milliseconds
+                        |> TypedTime.toString TypedTime.Seconds
+
+                projectTitle =
+                    findProject projectId pd
+                        |> Maybe.Extra.unwrap "<project-title-not-found-error>" .title
+            in
+            row []
+                [ column [ class "flex-auto" ] [ text projectTitle ]
+                , column [] [ text formattedTime ]
+                ]
+
+        viewDateGroup ( date, projectEntryList ) =
+            column [ class "pv2" ]
+                (row [ class "f4" ] [ text (Date.format "E ddd MMM y" date) ]
+                    :: List.map viewProjectEntry projectEntryList
+                )
+    in
+    gatherLogsByDateThenAggregateLogDurationByProjectId zone
+        >> List.map viewDateGroup
+        >> column []
 
 
 viewLogsGroupedByDate : Zone -> ProjectDict -> List Log -> Html msg
