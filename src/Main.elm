@@ -391,6 +391,13 @@ aggregateLogDurationByProject =
         >> List.sortBy (Tuple.second >> negate)
 
 
+aggregateLogsByDate : Zone -> List Log -> List ( Date, List Log )
+aggregateLogsByDate zone =
+    List.Extra.gatherEqualsBy (.start >> Date.fromPosix zone)
+        >> List.map (\( f, r ) -> ( Date.fromPosix zone f.start, f :: r ))
+        >> List.sortBy (Tuple.first >> Date.toRataDie >> negate)
+
+
 aggregateLogDurationByProjectId : List Log -> List ( ProjectId, Int )
 aggregateLogDurationByProjectId =
     List.Extra.gatherEqualsBy .pid
