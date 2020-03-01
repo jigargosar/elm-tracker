@@ -82,6 +82,11 @@ type alias Log =
     }
 
 
+logDurationInMillis : Log -> Int
+logDurationInMillis log =
+    posixDiff log.end log.start
+
+
 logGen : Activity -> Posix -> Generator Log
 logGen activity now =
     let
@@ -135,6 +140,18 @@ type alias LogDict =
 insertLog : Log -> LogDict -> LogDict
 insertLog log =
     Dict.insert (logIdToString log.id) log
+
+
+millisLoggedForProjectId : ProjectId -> LogDict -> Int
+millisLoggedForProjectId projectId =
+    Dict.values
+        >> List.filter (.pid >> is projectId)
+        >> List.map logDurationInMillis
+        >> List.sum
+
+
+is =
+    (==)
 
 
 
