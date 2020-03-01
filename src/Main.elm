@@ -382,11 +382,12 @@ toLogViewList zone pd =
 viewLogsGroupedByDate : Zone -> ProjectDict -> List Log -> Html msg
 viewLogsGroupedByDate zone pd allLogs =
     let
-        allLogViews : List ( LogView, List LogView )
-        allLogViews =
+        logViewsByDate : List ( Date, List LogView )
+        logViewsByDate =
             allLogs
                 |> toLogViewList zone pd
                 |> List.Extra.gatherEqualsBy .startDate
+                |> List.map (\( lv, restLv ) -> ( lv.startDate, lv :: restLv ))
 
         viewDateLogs ( log, restLogs ) =
             let
