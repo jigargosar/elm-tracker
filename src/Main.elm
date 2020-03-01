@@ -120,11 +120,6 @@ findProject projectId =
     Dict.get (pidToString projectId)
 
 
-findFirstProject : Model -> Maybe Project
-findFirstProject =
-    getAllProjects >> List.head
-
-
 getAllProjects : Model -> List Project
 getAllProjects =
     .projectDict >> Dict.values
@@ -257,7 +252,7 @@ update message model =
 
 startFirstActivity : Model -> ( Model, Cmd Msg )
 startFirstActivity model =
-    case findFirstProject model of
+    case getAllProjects model |> List.head of
         Just p ->
             ( model, trackProjectIdCmd p.id )
 
