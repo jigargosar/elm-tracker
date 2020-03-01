@@ -255,7 +255,7 @@ startFirstActivity : Model -> ( Model, Cmd Msg )
 startFirstActivity model =
     case findFirstProject model of
         Just p ->
-            ( model, trackProjectCmd p )
+            ( model, trackProjectIdCmd p.id )
 
         Nothing ->
             ( model, Cmd.none )
@@ -264,11 +264,6 @@ startFirstActivity model =
 performGetTime : (Posix -> msg) -> Cmd msg
 performGetTime func =
     Task.perform func Time.now
-
-
-trackProjectCmd : Project -> Cmd Msg
-trackProjectCmd =
-    .id >> trackProjectIdCmd
 
 
 trackProjectIdCmd : ProjectId -> Cmd Msg
