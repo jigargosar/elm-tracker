@@ -360,9 +360,11 @@ trackedView model =
                                     model.logDict
                                     |> List.map logDurationInMillis
                                     |> List.sum
+
+                            millisTrackedInActivity =
+                                elapsedMillisFromToPosix activity.start model.nowForView
                         in
-                        elapsedMillisFromToPosix activity.start model.nowForView
-                            |> (+) millisLoggedToday
+                        millisTrackedInActivity + millisLoggedToday
                     }
                         |> Just
 
