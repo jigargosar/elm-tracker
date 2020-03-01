@@ -170,7 +170,7 @@ update message =
             save
 
         TrackProject projectId ->
-            save >> andAddCmd (getTime (TrackProjectWithNow projectId))
+            save >> andGetTime (TrackProjectWithNow projectId)
 
         TrackProjectWithNow projectId start ->
             startActivity projectId start >> save
