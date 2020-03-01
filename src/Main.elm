@@ -94,8 +94,8 @@ logGen activity now =
 
 type alias Model =
     { pd : Dict String Project
-    , activity : Maybe Activity
     , logD : Dict String Log
+    , activity : Maybe Activity
     , now : Posix
     , seed : Seed
     }
