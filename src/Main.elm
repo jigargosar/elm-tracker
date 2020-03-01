@@ -204,6 +204,7 @@ startActivity pid posix model =
             }
 
 
+stopActivity : Model -> Model
 stopActivity model =
     case model.activity of
         Just activity ->
