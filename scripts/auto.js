@@ -12,8 +12,14 @@ const pSeries = require('p-series')
     })
   } catch (e) {
     if (DEBUG) {
-      console.error('ERROR: INSPECTING', inspect(e, false, 0, true))
-    } else if (e.code !== 1) {
+      if (e.code !== 1) {
+        console.error('ERROR: ', inspect(e, false, 0, true))
+      } else {
+        console.log('elm.json exists')
+      }
+    }
+
+    if (e.code !== 1) {
       console.error('ERROR: ', e.message, e.code)
     }
   }
