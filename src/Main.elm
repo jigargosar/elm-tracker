@@ -388,12 +388,13 @@ aggregateLogDurationByProject =
                 , f :: r |> List.map (.log >> logDurationInMillis) |> List.sum
                 )
             )
+        >> List.sortBy Tuple.second
 
 
 viewLogsGroupedByDate : Zone -> ProjectDict -> List Log -> Html msg
 viewLogsGroupedByDate zone pd allLogs =
     let
-        logViewsByDate : List ( Date, List LogView )
+        logViewsByDate : List ( Date, List ( Project, Int ) )
         logViewsByDate =
             allLogs
                 |> toLogViewList zone pd
@@ -405,6 +406,7 @@ viewLogsGroupedByDate zone pd allLogs =
                         )
                     )
                 |> List.sortBy (Tuple.first >> Date.toRataDie)
+                |> List.map (Tuple.mapSecond aggregateLogDurationByProject)
 
         viewDateLogs ( log, restLogs ) =
             let
