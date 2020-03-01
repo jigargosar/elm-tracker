@@ -187,8 +187,8 @@ getTime func =
     Time.now |> Task.perform func
 
 
-andWithTime : (Posix -> msg) -> ( a, Cmd msg ) -> ( a, Cmd msg )
-andWithTime func =
+andGetTime : (Posix -> msg) -> ( a, Cmd msg ) -> ( a, Cmd msg )
+andGetTime func =
     Time.now
         |> Task.perform func
         |> andAddCmd
