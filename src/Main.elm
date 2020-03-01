@@ -176,8 +176,8 @@ init { now } =
         |> andThen startFirstActivity
 
 
-getRecentLogs : Model -> List Log
-getRecentLogs =
+getAllSortedLogsEntries : Model -> List Log
+getAllSortedLogsEntries =
     .logDict >> Dict.values >> List.sortBy (.end >> Time.posixToMillis)
 
 
@@ -294,8 +294,8 @@ view model =
         [ viewMaybe viewTracked (trackedView model)
         , viewProjectList (getAllProjects model)
             |> column []
-        , row [] [ text "Recent LOGS" ]
-        , viewLogList (getRecentLogs model)
+        , row [] [ text "DEBUG: ALL LOG ENTRIES" ]
+        , viewLogList (getAllSortedLogsEntries model)
             |> column []
         ]
 
