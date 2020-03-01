@@ -7,8 +7,8 @@ const pSeries = require('p-series')
   try {
     await execa('elm', ['init'], {
       input: 'Y\n',
-      stdout: 'inherit',
-      stderr: 'inherit',
+      stdout: DEBUG ? 'inherit' : 'ignore',
+      stderr: DEBUG ? 'inherit' : 'ignore',
     })
   } catch (e) {
     if (DEBUG) {
