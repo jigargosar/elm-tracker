@@ -345,7 +345,7 @@ view model =
     column [ class "measure-narrow center ph2 pv2" ]
         [ viewMaybe viewTracked (trackedView model)
         , viewTimeLine model.here model.projectDict (Dict.values model.logDict)
-        , row [ class "pv4 f4" ] [ text "OLD VIEWS" ]
+        , row [ class "pv4 f4 mono" ] [ text "=== OLD VIEWS ===" ]
         , viewProjectList (getAllProjects model) |> column []
         , viewLogsGroupedByDate model.here model.projectDict (Dict.values model.logDict)
         , viewDebugList "DEBUG: Log Duration"
