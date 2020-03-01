@@ -210,14 +210,19 @@ startActivity pid posix =
                         Nothing ->
                             identity
                     )
-                        >> setActivity_ (Activity pid posix |> Just)
+                        >> setActivity (Activity pid posix)
             in
             model
         )
 
 
+setActivity_ : Maybe Activity -> Model -> Model
 setActivity_ a m =
     { m | activity = a }
+
+
+setActivity =
+    Just >> setActivity_
 
 
 setNow now m =
