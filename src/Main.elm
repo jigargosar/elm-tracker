@@ -291,7 +291,7 @@ subscriptions _ =
 view : Model -> Html Msg
 view model =
     column [ class "measure-narrow center ph2 pv2" ]
-        [ viewMaybe viewActivity (activityView model)
+        [ viewMaybe viewTracked (trackedView model)
         , viewProjectList (getAllProjects model)
             |> column []
         , row [] [ text "Recent LOGS" ]
@@ -300,8 +300,8 @@ view model =
         ]
 
 
-activityView : Model -> Maybe ActivityView
-activityView model =
+trackedView : Model -> Maybe ActivityView
+trackedView model =
     case model.activity of
         Just activity ->
             case findProject activity.pid model.projectDict of
@@ -328,8 +328,8 @@ type alias ActivityView =
     }
 
 
-viewActivity : ActivityView -> Html Msg
-viewActivity vm =
+viewTracked : ActivityView -> Html Msg
+viewTracked vm =
     let
         elapsed =
             posixDiff vm.start vm.now
