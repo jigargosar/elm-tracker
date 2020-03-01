@@ -8,7 +8,7 @@ import Html.Events exposing (onClick)
 import Html.Extra exposing (viewMaybe)
 import Random exposing (Generator, Seed)
 import Task
-import Time exposing (Posix)
+import Time exposing (Posix, Zone)
 import TimeTravel.Browser
 import TypedTime
 import Update.Pipeline exposing (..)
@@ -174,6 +174,7 @@ type alias Model =
     , logDict : Dict String Log
     , activity : Maybe Activity
     , nowForView : Posix
+    , here : Zone
     , seed : Seed
     }
 
@@ -192,11 +193,12 @@ init { now } =
             , logDict = Dict.empty
             , seed = Random.initialSeed now
             , nowForView = Time.millisToPosix now
+            , here = Time.utc
             , activity = Nothing
             }
     in
     ( model
-    , Cmd.none
+    , Time.here |> Task.perform GotHere
     )
         |> andThen
             (insertNewProject "P1"
@@ -267,11 +269,12 @@ stopTracking now model =
 
 type Msg
     = NoOp
+    | GotNowForView Posix
+    | GotHere Zone
     | TrackProjectClicked ProjectId
     | StopClicked
     | StartTrackWithNow ProjectId Posix
     | StopTrackingWithNow Posix
-    | GotNowForView Posix
 
 
 update : Msg -> Model -> ( Model, Cmd Msg )
@@ -279,6 +282,12 @@ update message model =
     case message of
         NoOp ->
             ( model, Cmd.none )
+
+        GotHere here ->
+            ( { model | here = here }, Cmd.none )
+
+        GotNowForView nowForView ->
+            ( { model | nowForView = nowForView }, Cmd.none )
 
         TrackProjectClicked pid ->
             ( model, trackProjectIdCmd pid )
@@ -288,9 +297,6 @@ update message model =
 
         StopTrackingWithNow now ->
             ( stopTracking now model, Cmd.none )
-
-        GotNowForView nowForView ->
-            ( { model | nowForView = nowForView }, Cmd.none )
 
         StopClicked ->
             ( model, Time.now |> Task.perform StopTrackingWithNow )
