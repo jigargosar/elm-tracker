@@ -417,22 +417,6 @@ viewLogsGroupedByDate zone pd allLogs =
         v2 =
             column [ class "pv2" ]
                 (List.map viewDateGroup logViewsByDateAndThenByProject)
-
-        viewDateLogs ( log, restLogs ) =
-            let
-                date =
-                    Date.fromPosix zone log.start
-            in
-            column [ class "pv1" ]
-                (row [ class "f4" ] [ text (Date.format "E ddd MMM y" date) ]
-                    :: viewDebugListItems (log :: restLogs)
-                )
-
-        v1 =
-            allLogs
-                |> List.Extra.gatherEqualsBy (.start >> Date.fromPosix zone)
-                |> List.map viewDateLogs
-                |> column [ class "pv2" ]
     in
     v2
 
