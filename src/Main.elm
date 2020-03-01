@@ -101,6 +101,11 @@ type alias Model =
     }
 
 
+getRecentLogs : Model -> List Log
+getRecentLogs =
+    .logD >> Dict.values >> List.sortBy (.end >> Time.posixToMillis)
+
+
 findProject : ProjectId -> Model -> Maybe Project
 findProject projectId model =
     Dict.get (pidToString projectId) model.pd
@@ -279,6 +284,9 @@ view model =
         [ viewProjectList (getAllProjects model)
             |> column []
         , viewMaybe viewActivity (activityView model)
+        , row [] [ text "Recent LOGS" ]
+        , viewLogList (getRecentLogs model)
+            |> column []
         ]
 
 
@@ -355,6 +363,15 @@ viewProjectList =
                 ]
     in
     List.map vp
+
+
+viewLogList : List Log -> List (Html Msg)
+viewLogList =
+    let
+        viewHelp log =
+            row [] [ text <| Debug.toString log.pid ]
+    in
+    List.map viewHelp
 
 
 row : List (Html.Attribute msg) -> List (Html msg) -> Html msg
