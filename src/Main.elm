@@ -13,18 +13,21 @@ import TypedTime
 import Update.Pipeline exposing (..)
 
 
-type alias Project =
-    { id : ProjectId
-    , title : String
-    }
+
+-- ID
+
+
+idGen : (String -> id) -> Generator id
+idGen tag =
+    Random.int 0 Random.maxInt |> Random.map (String.fromInt >> tag)
+
+
+
+-- ProjectId
 
 
 type ProjectId
     = ProjectId String
-
-
-type alias Pid =
-    ProjectId
 
 
 pidToString : ProjectId -> String
@@ -32,9 +35,14 @@ pidToString (ProjectId str) =
     str
 
 
-idGen : (String -> id) -> Generator id
-idGen tag =
-    Random.int 0 Random.maxInt |> Random.map (String.fromInt >> tag)
+
+-- Project
+
+
+type alias Project =
+    { id : ProjectId
+    , title : String
+    }
 
 
 projectGen : String -> Generator Project
@@ -47,12 +55,6 @@ projectGen title =
                     }
                )
         )
-
-
-type alias Activity =
-    { pid : ProjectId
-    , start : Posix
-    }
 
 
 
@@ -95,6 +97,12 @@ type alias Model =
     , activity : Maybe Activity
     , now : Posix
     , seed : Seed
+    }
+
+
+type alias Activity =
+    { pid : ProjectId
+    , start : Posix
     }
 
 
@@ -142,17 +150,6 @@ init { now } =
     , Cmd.none
     )
         |> andThen startFirstActivity
-
-
-addMaybeCmd : Maybe (Cmd msg) -> a -> ( a, Cmd msg )
-addMaybeCmd =
-    Maybe.withDefault Cmd.none >> addCmd
-
-
-startFirstActivity : Model -> ( Model, Cmd Msg )
-startFirstActivity =
-    with findFirstProject
-        (Maybe.map trackProjectCmd >> addMaybeCmd)
 
 
 insertNewProject : String -> Model -> Model
@@ -205,10 +202,22 @@ logAndClearCurrentActivityIfAny model =
             model
 
 
-startActivity : Pid -> Posix -> Model -> Model
-startActivity pid posix =
-    logAndClearCurrentActivityIfAny
-        >> setActivity (Activity pid posix)
+startActivity : ProjectId -> Posix -> Model -> Model
+startActivity pid posix model =
+    (case model.activity of
+        Just activity ->
+            case Random.step (logGen activity model.now) model.seed of
+                ( log, seed ) ->
+                    { model
+                        | activity = Nothing
+                        , logDict = insertLog log model.logDict
+                        , seed = seed
+                    }
+
+        Nothing ->
+            model
+    )
+        |> setActivity (Activity pid posix)
 
 
 setActivity_ : Maybe Activity -> Model -> Model
@@ -254,6 +263,17 @@ update message =
 
         StopClicked ->
             setActivity_ Nothing >> save
+
+
+addMaybeCmd : Maybe (Cmd msg) -> a -> ( a, Cmd msg )
+addMaybeCmd =
+    Maybe.withDefault Cmd.none >> addCmd
+
+
+startFirstActivity : Model -> ( Model, Cmd Msg )
+startFirstActivity =
+    with findFirstProject
+        (Maybe.map trackProjectCmd >> addMaybeCmd)
 
 
 performGetTime : (Posix -> msg) -> Cmd msg
