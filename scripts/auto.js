@@ -36,7 +36,7 @@ function installPackage(packageName) {
   console.log('Installing: ' + packageName)
   return execa('elm', ['install', packageName], {
     input: 'Y\n',
-    stdout: 'inherit',
+    stdout: DEBUG ? 'inherit' : null,
     stderr: 'inherit',
   })
 }
