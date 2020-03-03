@@ -262,7 +262,10 @@ view model =
         , viewMaybe viewTracked (trackedView model)
         , case model.page of
             TimelinePage ->
-                viewTimeLine model.here model.projectDict (Dict.values model.logDict)
+                viewTimeLine (Date.fromPosix model.here model.nowForView)
+                    model.here
+                    model.projectDict
+                    (Dict.values model.logDict)
 
             ProjectListPage ->
                 column [] (viewProjectList (getAllProjects model))
@@ -364,8 +367,8 @@ gatherLogsByDateThenAggregateLogDurationByProjectId zone =
         >> List.map (Tuple.mapSecond aggregateLogDurationByProjectId)
 
 
-viewTimeLine : Zone -> ProjectDict -> List Log -> Html Msg
-viewTimeLine zone pd logs =
+viewTimeLine : Date -> Zone -> ProjectDict -> List Log -> Html Msg
+viewTimeLine today zone pd logs =
     let
         viewProjectEntry : ( ProjectId, TypedTime ) -> Html Msg
         viewProjectEntry ( projectId, elapsedTT ) =
