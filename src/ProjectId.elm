@@ -17,7 +17,7 @@ prefix =
 
 generator : Generator ProjectId
 generator =
-    IdGenerator.map ProjectId
+    IdGenerator.mapWithPrefix prefix ProjectId
 
 
 toString : ProjectId -> String
