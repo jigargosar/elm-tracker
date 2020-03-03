@@ -4,6 +4,7 @@ import LogId exposing (LogId)
 import ProjectId exposing (ProjectId)
 import Random exposing (Generator)
 import Time exposing (Posix)
+import TypedTime exposing (TypedTime)
 
 
 type alias Log =
@@ -31,6 +32,11 @@ generator projectId_ start_ end_ =
 elapsedMillis : Log -> Int
 elapsedMillis log =
     endMillis log - startMillis log
+
+
+elapsed : Log -> TypedTime
+elapsed =
+    elapsedMillis >> toFloat >> TypedTime.milliseconds
 
 
 startMillis : Log -> Int
