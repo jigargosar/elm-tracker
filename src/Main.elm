@@ -402,7 +402,7 @@ viewTimeLine zone pd logs =
                 |> gatherLogsByDateThenAggregateLogDurationByProjectId zone
                 |> List.map viewDateGroup
     in
-    column [] (row [ class "pv2 f4" ] [ text "Time Line" ] :: dateGroupsList)
+    column [] dateGroupsList
 
 
 trackedView : Model -> Maybe ActivityView
