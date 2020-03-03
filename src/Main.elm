@@ -9,6 +9,7 @@ import Html.Extra exposing (viewMaybe)
 import List.Extra
 import LogId exposing (LogId)
 import Maybe.Extra
+import Project exposing (Project)
 import ProjectId exposing (ProjectId)
 import Random exposing (Generator, Seed)
 import Task
@@ -16,27 +17,6 @@ import Time exposing (Posix, Zone)
 import TimeTravel.Browser
 import TypedTime
 import Update.Pipeline exposing (..)
-
-
-
--- Project
-
-
-type alias Project =
-    { id : ProjectId
-    , title : String
-    }
-
-
-projectGen : String -> Generator Project
-projectGen title =
-    ProjectId.generator
-        |> Random.map
-            (\id ->
-                { id = id
-                , title = title
-                }
-            )
 
 
 
@@ -95,7 +75,7 @@ findProject projectId =
 
 insertProject : Project -> ProjectDict -> ProjectDict
 insertProject project =
-    Dict.insert (ProjectId.toString project.id) project
+    Dict.insert (Project.idString project) project
 
 
 
@@ -198,7 +178,7 @@ getAllProjects =
 
 insertNewProject : String -> Model -> Model
 insertNewProject title model =
-    case Random.step (projectGen title) model.seed of
+    case Random.step (Project.generator title) model.seed of
         ( project, seed ) ->
             { model
                 | activity = Nothing
@@ -284,7 +264,7 @@ startFirstActivity : Model -> ( Model, Cmd Msg )
 startFirstActivity model =
     case getAllProjects model |> List.head of
         Just p ->
-            ( model, trackProjectIdCmd p.id )
+            ( model, trackProjectIdCmd (Project.id p) )
 
         Nothing ->
             ( model, Cmd.none )
@@ -349,7 +329,7 @@ toLogViewList zone pd =
 
 aggregateLogDurationByProject : List { a | project : Project, log : Log } -> List ( Project, Int )
 aggregateLogDurationByProject =
-    List.Extra.gatherEqualsBy (.project >> .id)
+    List.Extra.gatherEqualsBy (.project >> Project.id)
         >> List.map
             (\( f, r ) ->
                 ( f.project
@@ -397,7 +377,7 @@ viewTimeLine zone pd =
 
                 projectTitle =
                     findProject projectId pd
-                        |> Maybe.Extra.unwrap "<project-title-not-found-error>" .title
+                        |> Maybe.Extra.unwrap "<project-title-not-found-error>" Project.title
             in
             row [ class "mv1" ]
                 [ row [ class "pv1 mr2 flex-grow-1" ] [ text projectTitle ]
@@ -437,6 +417,7 @@ viewLogsGroupedByDate zone pd allLogs =
                 |> List.sortBy (Tuple.first >> Date.toRataDie)
                 |> List.map (Tuple.mapSecond aggregateLogDurationByProject)
 
+        viewProjectEntry : ( Project, Int ) -> Html msg
         viewProjectEntry ( project, elapsedMillis ) =
             let
                 formattedTime =
@@ -446,10 +427,11 @@ viewLogsGroupedByDate zone pd allLogs =
                         |> TypedTime.toString TypedTime.Seconds
             in
             row []
-                [ column [ class "flex-auto" ] [ text project.title ]
+                [ column [ class "flex-auto" ] [ text <| Project.title project ]
                 , column [] [ text formattedTime ]
                 ]
 
+        viewDateGroup : ( Date, List ( Project, Int ) ) -> Html msg
         viewDateGroup ( date, list ) =
             column [ class "pv2" ]
                 (row [ class "f4" ] [ text (Date.format "E ddd MMM y" date) ]
@@ -467,7 +449,7 @@ trackedView model =
             case findProject activity.pid model.projectDict of
                 Just project ->
                     { pid = activity.pid
-                    , title = project.title
+                    , title = Project.title project
                     , millisTrackedToday =
                         let
                             millisLoggedToday =
@@ -534,12 +516,13 @@ elapsedMillisFromToPosix a b =
 viewProjectList : List Project -> List (Html Msg)
 viewProjectList =
     let
+        vp : Project -> Html msg
         vp p =
             row [ class "mv1" ]
-                [ row [ class "pv1 flex-grow-1" ] [ text p.title ]
+                [ row [ class "pv1 flex-grow-1" ] [ text <| Project.title p ]
                 , button
                     [ class "pointer bn pv1 ph2"
-                    , onClick <| TrackProjectClicked p.id
+                    , onClick <| TrackProjectClicked <| Project.id p
                     ]
                     [ text "|>" ]
                 ]
