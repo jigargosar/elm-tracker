@@ -1,4 +1,4 @@
-module Log exposing (Log, generator)
+module Log exposing (Log, elapsedMillis, generator)
 
 import LogId exposing (LogId)
 import ProjectId exposing (ProjectId)
@@ -15,14 +15,39 @@ type alias Log =
 
 
 generator : ProjectId -> Posix -> Posix -> Generator Log
-generator projectId start end =
+generator projectId_ start_ end_ =
     let
         initHelp : LogId -> Log
         initHelp id =
             { id_ = id
-            , pid_ = projectId
-            , start_ = start
-            , end_ = end
+            , pid_ = projectId_
+            , start_ = start_
+            , end_ = end_
             }
     in
     LogId.generator |> Random.map initHelp
+
+
+elapsedMillis : Log -> Int
+elapsedMillis log =
+    endMillis log - startMillis log
+
+
+startMillis : Log -> Int
+startMillis =
+    start >> Time.posixToMillis
+
+
+endMillis : Log -> Int
+endMillis =
+    end >> Time.posixToMillis
+
+
+start : Log -> Posix
+start =
+    .start_
+
+
+end : Log -> Posix
+end =
+    .end_
