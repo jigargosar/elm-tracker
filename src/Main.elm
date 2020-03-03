@@ -95,9 +95,9 @@ groupLogsByDate zone logDict =
 -- Model
 
 
-type Route
-    = TimelineRoute
-    | ProjectListRoute
+type Page
+    = TimelinePage
+    | ProjectListPage
 
 
 type alias Model =
@@ -107,7 +107,7 @@ type alias Model =
     , nowForView : Posix
     , here : Zone
     , seed : Seed
-    , route : Route
+    , route : Page
     }
 
 
@@ -127,7 +127,7 @@ init { now } =
             , nowForView = Time.millisToPosix now
             , here = Time.utc
             , activity = Nothing
-            , route = TimelineRoute
+            , route = TimelinePage
             }
     in
     ( model
@@ -202,7 +202,7 @@ stopTracking now model =
 
 type Msg
     = NoOp
-    | OnNavLinkClicked Route
+    | OnNavLinkClicked Page
     | GotNowForView Posix
     | GotHere Zone
     | TrackProjectClicked ProjectId
@@ -271,10 +271,10 @@ view model =
         [ viewNavHeader model.route
         , viewMaybe viewTracked (trackedView model)
         , case model.route of
-            ProjectListRoute ->
+            ProjectListPage ->
                 viewTimeLine model.here model.projectDict (Dict.values model.logDict)
 
-            TimelineRoute ->
+            TimelinePage ->
                 viewTimeLine model.here model.projectDict (Dict.values model.logDict)
         , debugAndOtherViews model
         ]
@@ -289,13 +289,13 @@ viewNavHeader currentRoute =
             else
                 "black"
 
-        toTitle : Route -> String
+        toTitle : Page -> String
         toTitle route =
             case route of
-                ProjectListRoute ->
+                ProjectListPage ->
                     "ProjectListRoute"
 
-                TimelineRoute ->
+                TimelinePage ->
                     "TimelineRoute"
 
         link route =
@@ -308,7 +308,7 @@ viewNavHeader currentRoute =
                 [ text <| toTitle route ]
 
         links =
-            [ TimelineRoute, ProjectListRoute ]
+            [ TimelinePage, ProjectListPage ]
                 |> List.map link
     in
     row [ class "pv2" ] links
