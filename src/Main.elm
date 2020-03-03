@@ -516,7 +516,7 @@ elapsedMillisFromToPosix a b =
 viewProjectList : List Project -> List (Html Msg)
 viewProjectList =
     let
-        vp : Project -> Html msg
+        vp : Project -> Html Msg
         vp p =
             row [ class "mv1" ]
                 [ row [ class "pv1 flex-grow-1" ] [ text <| Project.title p ]
