@@ -326,7 +326,7 @@ viewRecentLogs pd logs =
         recentGroups : List ( Project, List Log )
         recentGroups =
             logs
-                |> List.sortBy Log.startMillis
+                |> List.sortBy (Log.startMillis >> negate)
                 |> List.Extra.groupWhile (eqBy Log.projectId)
                 |> List.filterMap
                     (\( l, ls ) ->
@@ -335,7 +335,18 @@ viewRecentLogs pd logs =
                     )
 
         viewL ( p, ls ) =
-            row [] [ text <| Project.title p ]
+            let
+                title =
+                    Project.title p
+
+                trackedSum =
+                    Log.sumTracked ls
+                        |> TypedTime.toString TypedTime.Seconds
+            in
+            row [ class "" ]
+                [ row [ class "flex-grow-1" ] [ text title ]
+                , row [] [ text trackedSum ]
+                ]
     in
     column [] (List.map viewL recentGroups)
 
