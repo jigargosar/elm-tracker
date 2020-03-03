@@ -135,6 +135,7 @@ mockProjectNames =
     , "Clone Toggle"
     , "Prepare for JP"
     , "Emails"
+    , "Add Mock Logs"
     ]
 
 
