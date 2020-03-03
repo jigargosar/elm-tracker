@@ -304,7 +304,7 @@ view : Model -> Html Msg
 view model =
     column [ class "measure-narrow center ph2 pv2" ]
         [ viewMaybe viewTracked (trackedView model)
-        , viewTracked2
+        , viewTracked2 (toActivityView2 model.nowForView model.projectDict model.activity)
         , viewTabs model.tabs
         , case Pivot.getC model.tabs of
             RecentTab ->
@@ -395,136 +395,6 @@ viewRecentLogs pd logs =
     column [] (List.map viewL recentGroups)
 
 
-
---type alias LogView =
---    { log : Log
---    , project : Project
---    , startDate : Date
---    }
---
---toLogView : Zone -> ProjectDict -> Log -> Maybe LogView
---toLogView zone pd log =
---    Maybe.map
---        (\project ->
---            { log = log
---            , project = project
---            , startDate = Log.startDate zone log
---            }
---        )
---        (findProject (Log.projectId log) pd)
---
---toLogViewList : Zone -> ProjectDict -> List Log -> List LogView
---toLogViewList zone pd =
---    List.filterMap (toLogView zone pd)
---
---
---aggregateLogDurationByProject : List { a | project : Project, log : Log } -> List ( Project, TypedTime )
---aggregateLogDurationByProject =
---    List.Extra.gatherEqualsBy (.project >> Project.id)
---        >> List.map
---            (\( f, r ) ->
---                ( f.project
---                , f :: r |> List.map .log |> Log.sumTracked
---                )
---            )
---        >> List.sortBy (Tuple.second >> TypedTime.toSeconds >> negate)
---
---gatherLogsByDate : Zone -> List Log -> List ( Date, List Log )
---gatherLogsByDate zone =
---    List.Extra.gatherEqualsBy (Log.startDate zone)
---        >> List.map (\( f, r ) -> ( Log.startDate zone f, f :: r ))
---        >> List.sortBy (Tuple.first >> Date.toRataDie >> negate)
---
---
---aggregateLogDurationByProjectId : List Log -> List ( ProjectId, TypedTime )
---aggregateLogDurationByProjectId =
---    List.Extra.gatherEqualsBy Log.projectId
---        >> List.map
---            (\( f, r ) ->
---                ( Log.projectId f
---                , f :: r |> Log.sumTracked
---                )
---            )
---        >> List.sortBy (Tuple.second >> TypedTime.toSeconds >> negate)
---
---gatherLogsByDateThenAggregateLogDurationByProjectId : Zone -> List Log -> List ( Date, List ( ProjectId, TypedTime ) )
---gatherLogsByDateThenAggregateLogDurationByProjectId zone =
---    gatherLogsByDate zone
---        >> List.map (Tuple.mapSecond aggregateLogDurationByProjectId)
---
---viewTimeLine : Maybe Activity -> Date -> Zone -> ProjectDict -> List Log -> Html Msg
---viewTimeLine activity today zone pd logs =
---    let
---        viewProjectEntry : ( ProjectId, TypedTime ) -> Html Msg
---        viewProjectEntry ( projectId, elapsedTT ) =
---            let
---                formattedTime : String
---                formattedTime =
---                    elapsedTT
---                        |> TypedTime.toString TypedTime.Seconds
---
---                projectTitle : String
---                projectTitle =
---                    findProject projectId pd
---                        |> Maybe.Extra.unwrap "<project-title-not-found-error>" Project.title
---            in
---            row [ class "mv1" ]
---                [ row [ class "pv1 mr2 flex-grow-1" ] [ text projectTitle ]
---                , column [ class "pv1 mr2" ] [ text formattedTime ]
---                , button
---                    [ class "pointer bn pv1 ph2"
---                    , onClick <| TrackProjectClicked projectId
---                    ]
---                    [ text "|>" ]
---                ]
---
---        dateToString : Date -> String
---        dateToString date =
---            if date == today then
---                "Today"
---
---            else
---                Date.format "E ddd MMM y" date
---
---        viewDateGroup : ( Date, List ( ProjectId, TypedTime ) ) -> Html Msg
---        viewDateGroup ( date, projectEntryList ) =
---            let
---                filterPE ( pid, _ ) =
---                    case ( date == today, activity ) of
---                        ( True, Just act ) ->
---                            if act.pid == pid then
---                                False
---
---                            else
---                                True
---
---                        _ ->
---                            True
---
---                entryViews =
---                    projectEntryList
---                        |> List.filter filterPE
---                        |> List.map viewProjectEntry
---            in
---            case entryViews of
---                [] ->
---                    nothing
---
---                _ ->
---                    column [ class "pv2" ]
---                        (row [ class "f4" ] [ text (dateToString date) ]
---                            :: entryViews
---                        )
---
---        dateGroupsList =
---            logs
---                |> gatherLogsByDateThenAggregateLogDurationByProjectId zone
---                |> List.map viewDateGroup
---    in
---    column [] dateGroupsList
---
-
-
 trackedView : Model -> Maybe ActivityView
 trackedView model =
     case model.activity of
@@ -560,6 +430,35 @@ trackedView model =
             Nothing
 
 
+type alias ActivityView2 =
+    { pid : ProjectId
+    , title : String
+    , elapsed : TypedTime
+    }
+
+
+toActivityView2 : Posix -> ProjectDict -> Maybe Activity -> Maybe ActivityView2
+toActivityView2 now pd activity =
+    case activity of
+        Just { pid, start } ->
+            case findProject pid pd of
+                Just p ->
+                    Just
+                        { pid = pid
+                        , title = Project.title p
+                        , elapsed =
+                            elapsedMillisFromToPosix start now
+                                |> toFloat
+                                |> TypedTime.milliseconds
+                        }
+
+                Nothing ->
+                    Nothing
+
+        Nothing ->
+            Nothing
+
+
 type alias ActivityView =
     { pid : ProjectId
     , title : String
@@ -567,23 +466,41 @@ type alias ActivityView =
     }
 
 
-viewTracked2 : Html Msg
-viewTracked2 =
-    let
-        o1 title =
-            option [] [ text title ]
+viewTracked2 : Maybe ActivityView2 -> Html Msg
+viewTracked2 maybeV =
+    case maybeV of
+        Nothing ->
+            let
+                o1 title =
+                    option [] [ text title ]
 
-        titles =
-            "--ADD NEW--" :: mockProjectNames
-    in
-    column [ class "pv2" ]
-        [ column [] [ select [] (List.map o1 titles) ]
-        , row [ class "pv1" ]
-            [ row [ class "flex-auto" ] []
-            , row [ class "pv1 mr2" ] [ text "00:02::11" ]
-            , row [ class "" ] [ btn1 "STOP" ]
-            ]
-        ]
+                titles =
+                    mockProjectNames
+            in
+            column [ class "pv2" ]
+                [ column [] [ select [] (List.map o1 titles) ]
+                , row [ class "pv1" ]
+                    [ row [ class "flex-auto" ] []
+                    , row [ class "" ] [ btn1 "START" ]
+                    ]
+                ]
+
+        Just v ->
+            let
+                o1 title =
+                    option [] [ text title ]
+
+                titles =
+                    mockProjectNames
+            in
+            column [ class "pv2" ]
+                [ column [] [ select [] (List.map o1 titles) ]
+                , row [ class "pv1" ]
+                    [ row [ class "flex-auto" ] []
+                    , row [ class "pv1 mr2" ] [ text "00:02::11" ]
+                    , row [ class "" ] [ btn1 "STOP" ]
+                    ]
+                ]
 
 
 btn1 : String -> Html Msg
