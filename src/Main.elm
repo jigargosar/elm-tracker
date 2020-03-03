@@ -7,7 +7,7 @@ import Html.Attributes exposing (class)
 import Html.Events exposing (onClick)
 import Html.Extra exposing (viewMaybe)
 import List.Extra
-import LogId exposing (LogId)
+import Log exposing (Log)
 import Maybe.Extra
 import Project exposing (Project)
 import ProjectId exposing (ProjectId)
@@ -17,42 +17,6 @@ import Time exposing (Posix, Zone)
 import TimeTravel.Browser
 import TypedTime exposing (TypedTime)
 import Update.Pipeline exposing (..)
-
-
-
--- LOG ENTRIES
-
-
-type alias Log =
-    { id : LogId
-    , pid : ProjectId
-    , start : Posix
-    , end : Posix
-    }
-
-
-logDuration : Log -> TypedTime
-logDuration =
-    let
-        logDurationInMillis : Log -> Int
-        logDurationInMillis log =
-            elapsedMillisFromToPosix log.start log.end
-    in
-    logDurationInMillis >> toFloat >> TypedTime.milliseconds
-
-
-logGen : Activity -> Posix -> Generator Log
-logGen activity now =
-    let
-        initHelp : LogId -> Log
-        initHelp id =
-            { id = id
-            , pid = activity.pid
-            , start = activity.start
-            , end = now
-            }
-    in
-    LogId.generator |> Random.map initHelp
 
 
 
@@ -93,7 +57,7 @@ type alias LogDict =
 
 insertLog : Log -> LogDict -> LogDict
 insertLog log =
-    Dict.insert (LogId.toString log.id) log
+    Dict.insert (Log.idString log) log
 
 
 logsForProjectIdOnDate : Zone -> Date -> ProjectId -> LogDict -> List Log
@@ -101,10 +65,8 @@ logsForProjectIdOnDate zone date projectId =
     Dict.values
         >> List.filter
             (allPass
-                [ .pid >> is projectId
-                , .start
-                    >> Date.fromPosix zone
-                    >> Date.isBetween date date
+                [ Log.projectId >> is projectId
+                , Log.startDate zone >> Date.isBetween date date
                 ]
             )
 
@@ -125,7 +87,7 @@ groupLogsByDate zone logDict =
         logs =
             Dict.values logDict
     in
-    List.Extra.gatherEqualsBy (.start >> Date.fromPosix zone) logs
+    List.Extra.gatherEqualsBy (Log.startDate zone) logs
 
 
 
@@ -173,7 +135,7 @@ init { now } =
 
 getAllSortedLogsEntries : Model -> List Log
 getAllSortedLogsEntries =
-    .logDict >> Dict.values >> List.sortBy (.end >> Time.posixToMillis)
+    .logDict >> Dict.values >> List.sortBy Log.endMillis
 
 
 getAllProjects : Model -> List Project
@@ -196,7 +158,7 @@ startTracking : ProjectId -> Posix -> Model -> Model
 startTracking pid now model =
     case model.activity of
         Just activity ->
-            case Random.step (logGen activity now) model.seed of
+            case Random.step (Log.generator activity.pid activity.start now) model.seed of
                 ( log, seed ) ->
                     { model
                         | activity = Just (Activity pid now)
@@ -214,7 +176,7 @@ stopTracking : Posix -> Model -> Model
 stopTracking now model =
     case model.activity of
         Just activity ->
-            case Random.step (logGen activity now) model.seed of
+            case Random.step (Log.generator activity.pid activity.start now) model.seed of
                 ( log, seed ) ->
                     { model
                         | activity = Nothing
@@ -301,7 +263,7 @@ view model =
         , viewLogsGroupedByDate model.here model.projectDict (Dict.values model.logDict)
         , viewDebugList "DEBUG: Log Duration"
             (getAllSortedLogsEntries model
-                |> List.map logDuration
+                |> List.map Log.elapsed
             )
         , viewDebugList "DEBUG: ALL PROJECTS" (getAllProjects model)
         , viewDebugList "DEBUG: ALL LOG ENTRIES" (getAllSortedLogsEntries model)
@@ -321,10 +283,10 @@ toLogView zone pd log =
         (\project ->
             { log = log
             , project = project
-            , startDate = Date.fromPosix zone log.start
+            , startDate = Log.startDate zone log
             }
         )
-        (findProject log.pid pd)
+        (findProject (Log.projectId log) pd)
 
 
 toLogViewList : Zone -> ProjectDict -> List Log -> List LogView
@@ -338,7 +300,7 @@ aggregateLogDurationByProject =
         >> List.map
             (\( f, r ) ->
                 ( f.project
-                , f :: r |> List.map (.log >> logDuration) |> List.foldl TypedTime.add TypedTime.zero
+                , f :: r |> List.map (.log >> Log.elapsed) |> List.foldl TypedTime.add TypedTime.zero
                 )
             )
         >> List.sortBy (Tuple.second >> TypedTime.toSeconds >> negate)
@@ -346,18 +308,18 @@ aggregateLogDurationByProject =
 
 gatherLogsByDate : Zone -> List Log -> List ( Date, List Log )
 gatherLogsByDate zone =
-    List.Extra.gatherEqualsBy (.start >> Date.fromPosix zone)
-        >> List.map (\( f, r ) -> ( Date.fromPosix zone f.start, f :: r ))
+    List.Extra.gatherEqualsBy (Log.startDate zone)
+        >> List.map (\( f, r ) -> ( Log.startDate zone f, f :: r ))
         >> List.sortBy (Tuple.first >> Date.toRataDie >> negate)
 
 
 aggregateLogDurationByProjectId : List Log -> List ( ProjectId, TypedTime )
 aggregateLogDurationByProjectId =
-    List.Extra.gatherEqualsBy .pid
+    List.Extra.gatherEqualsBy Log.projectId
         >> List.map
             (\( f, r ) ->
-                ( f.pid
-                , f :: r |> List.foldl (logDuration >> TypedTime.add) TypedTime.zero
+                ( Log.projectId f
+                , f :: r |> List.foldl (Log.elapsed >> TypedTime.add) TypedTime.zero
                 )
             )
         >> List.sortBy (Tuple.second >> TypedTime.toSeconds >> negate)
@@ -462,7 +424,7 @@ trackedView model =
                                     (Date.fromPosix model.here model.nowForView)
                                     activity.pid
                                     model.logDict
-                                    |> List.foldl (logDuration >> TypedTime.add) TypedTime.zero
+                                    |> List.foldl (Log.elapsed >> TypedTime.add) TypedTime.zero
 
                             millisTrackedInActivity : TypedTime
                             millisTrackedInActivity =
