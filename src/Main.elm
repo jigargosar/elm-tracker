@@ -12,6 +12,7 @@ import List.Extra
 import Log exposing (Log)
 import LogDict exposing (LogDict)
 import Pivot exposing (Pivot)
+import Port
 import Project exposing (Project)
 import ProjectId exposing (ProjectId)
 import Random exposing (Generator, Seed)
@@ -173,13 +174,19 @@ recordCurrentActivityAndSetTo now newActivity model =
         |> setActivity newActivity
 
 
-startTracking : ProjectId -> Posix -> Model -> Model
+startTracking : ProjectId -> Posix -> Model -> ( Model, Cmd Msg )
 startTracking pid now =
     let
         activity =
             Just (Activity pid now)
     in
     recordCurrentActivityAndSetTo now activity
+        >> with cacheLogDict addCmd
+
+
+cacheLogDict : Model -> Cmd msg
+cacheLogDict model =
+    Port.cacheLogDict (LogDict.encoder model.logDict)
 
 
 stopTracking : Posix -> Model -> Model
@@ -221,7 +228,7 @@ update message model =
             ( model, trackProjectIdCmd pid )
 
         StartTrackWithNow projectId start ->
-            ( startTracking projectId start model, Cmd.none )
+            startTracking projectId start model
 
         StopTrackingWithNow now ->
             ( stopTracking now model, Cmd.none )
