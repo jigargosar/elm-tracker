@@ -1,7 +1,7 @@
-module LogId exposing (LogId, decoder, encoder, generator, toString)
+module LogId exposing (LogId, decoder, encoder, foo, generator, toString)
 
 import IdGenerator
-import Json.Decode exposing (Decoder)
+import Json.Decode as JD exposing (Decoder)
 import Json.Encode as JE exposing (Value)
 import Random exposing (Generator)
 
@@ -33,3 +33,13 @@ encoder (LogId str) =
 decoder : Decoder LogId
 decoder =
     IdGenerator.decodeWhenPrefixed prefix LogId
+
+
+foo : Result String LogId
+foo =
+    Random.step generator (Random.initialSeed 0)
+        |> Tuple.first
+        |> encoder
+        |> JD.decodeValue decoder
+        |> Result.mapError JD.errorToString
+        |> Debug.log "debug"

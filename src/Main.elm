@@ -13,6 +13,7 @@ import Json.Encode exposing (Value)
 import List.Extra
 import Log exposing (Log)
 import LogDict exposing (LogDict)
+import LogId
 import Pivot exposing (Pivot)
 import Port
 import Project exposing (Project)
@@ -88,6 +89,9 @@ type alias Flags =
 init : Flags -> ( Model, Cmd Msg )
 init { now, logDict } =
     let
+        _ =
+            LogId.foo
+
         model : Model
         model =
             { projectDict = Dict.empty
