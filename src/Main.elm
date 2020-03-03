@@ -96,8 +96,8 @@ groupLogsByDate zone logDict =
 
 
 type Route
-    = ProjectListRoute
-    | TimelineRoute
+    = TimelineRoute
+    | ProjectListRoute
 
 
 type alias Model =
