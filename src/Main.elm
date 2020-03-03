@@ -262,7 +262,9 @@ view model =
         , viewMaybe viewTracked (trackedView model)
         , case model.page of
             TimelinePage ->
-                viewTimeLine (Date.fromPosix model.here model.nowForView)
+                viewTimeLine
+                    model.activity
+                    (Date.fromPosix model.here model.nowForView)
                     model.here
                     model.projectDict
                     (Dict.values model.logDict)
@@ -367,8 +369,8 @@ gatherLogsByDateThenAggregateLogDurationByProjectId zone =
         >> List.map (Tuple.mapSecond aggregateLogDurationByProjectId)
 
 
-viewTimeLine : Date -> Zone -> ProjectDict -> List Log -> Html Msg
-viewTimeLine today zone pd logs =
+viewTimeLine : Maybe Activity -> Date -> Zone -> ProjectDict -> List Log -> Html Msg
+viewTimeLine activity today zone pd logs =
     let
         viewProjectEntry : ( ProjectId, TypedTime ) -> Html Msg
         viewProjectEntry ( projectId, elapsedTT ) =
@@ -403,9 +405,25 @@ viewTimeLine today zone pd logs =
 
         viewDateGroup : ( Date, List ( ProjectId, TypedTime ) ) -> Html Msg
         viewDateGroup ( date, projectEntryList ) =
+            let
+                filterPE ( pid, _ ) =
+                    case ( date == today, activity ) of
+                        ( True, Just act ) ->
+                            if act.pid == pid then
+                                False
+
+                            else
+                                True
+
+                        _ ->
+                            True
+            in
             column [ class "pv2" ]
                 (row [ class "f4" ] [ text (dateToString date) ]
-                    :: List.map viewProjectEntry projectEntryList
+                    :: (projectEntryList
+                            |> List.filter filterPE
+                            |> List.map viewProjectEntry
+                       )
                 )
 
         dateGroupsList =
