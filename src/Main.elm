@@ -7,35 +7,15 @@ import Html.Attributes exposing (class)
 import Html.Events exposing (onClick)
 import Html.Extra exposing (viewMaybe)
 import List.Extra
+import LogId exposing (LogId)
 import Maybe.Extra
+import ProjectId exposing (ProjectId)
 import Random exposing (Generator, Seed)
 import Task
 import Time exposing (Posix, Zone)
 import TimeTravel.Browser
 import TypedTime
 import Update.Pipeline exposing (..)
-
-
-
--- ID
-
-
-idGen : (String -> id) -> Generator id
-idGen tag =
-    Random.int 0 Random.maxInt |> Random.map (String.fromInt >> tag)
-
-
-
--- ProjectId
-
-
-type ProjectId
-    = ProjectId String
-
-
-pidToString : ProjectId -> String
-pidToString (ProjectId str) =
-    str
 
 
 
@@ -50,27 +30,13 @@ type alias Project =
 
 projectGen : String -> Generator Project
 projectGen title =
-    idGen
-        (ProjectId
-            >> (\id ->
-                    { id = id
-                    , title = title
-                    }
-               )
-        )
-
-
-
--- LOG ID
-
-
-type LogId
-    = LogId String
-
-
-logIdToString : LogId -> String
-logIdToString (LogId id) =
-    id
+    ProjectId.generator
+        |> Random.map
+            (\id ->
+                { id = id
+                , title = title
+                }
+            )
 
 
 
@@ -101,7 +67,7 @@ logGen activity now =
             , end = now
             }
     in
-    idGen (LogId >> initHelp)
+    LogId.generator |> Random.map initHelp
 
 
 
@@ -124,12 +90,12 @@ type alias ProjectDict =
 
 findProject : ProjectId -> ProjectDict -> Maybe Project
 findProject projectId =
-    Dict.get (pidToString projectId)
+    Dict.get (ProjectId.toString projectId)
 
 
 insertProject : Project -> ProjectDict -> ProjectDict
 insertProject project =
-    Dict.insert (pidToString project.id) project
+    Dict.insert (ProjectId.toString project.id) project
 
 
 
@@ -142,7 +108,7 @@ type alias LogDict =
 
 insertLog : Log -> LogDict -> LogDict
 insertLog log =
-    Dict.insert (logIdToString log.id) log
+    Dict.insert (LogId.toString log.id) log
 
 
 logsForProjectIdOnDate : Zone -> Date -> ProjectId -> LogDict -> List Log
