@@ -20,7 +20,8 @@
             "justinmimbs/date": "3.2.0",
             "jxxcarlson/elm-typed-time": "1.2.0",
             "laserpants/elm-update-pipeline": "1.1.0",
-            "savardd/elm-time-travel": "2.0.0"
+            "savardd/elm-time-travel": "2.0.0",
+            "yotamDvir/elm-pivot": "3.1.0"
         },
         "indirect": {
             "andre-dietrich/parser-combinators": "3.2.0",

@@ -10,6 +10,7 @@ import Html.Extra exposing (nothing, viewMaybe)
 import List.Extra
 import Log exposing (Log)
 import Maybe.Extra
+import Pivot exposing (Pivot)
 import Project exposing (Project)
 import ProjectId exposing (ProjectId)
 import Random exposing (Generator, Seed)
@@ -97,7 +98,7 @@ type alias Model =
     , nowForView : Posix
     , here : Zone
     , seed : Seed
-    , tab : Tab
+    , tabs : Pivot Tab
     }
 
 
@@ -117,7 +118,7 @@ init { now } =
             , nowForView = Time.millisToPosix now
             , here = Time.utc
             , activity = Nothing
-            , tab = RecentTab
+            , tabs = Pivot.fromCons RecentTab [ ProjectsTab ]
             }
     in
     ( model
@@ -208,7 +209,7 @@ update message model =
             ( model, Cmd.none )
 
         OnNavLinkClicked tab ->
-            ( { model | tab = tab }, Cmd.none )
+            ( { model | tabs = Pivot.withRollback (Pivot.firstWith (is tab)) model.tabs }, Cmd.none )
 
         GotHere here ->
             ( { model | here = here }, Cmd.none )
@@ -258,9 +259,9 @@ subscriptions _ =
 view : Model -> Html Msg
 view model =
     column [ class "measure-narrow center ph2 pv2" ]
-        [ viewNavHeader model.tab
-        , viewMaybe viewTracked (trackedView model)
-        , case model.tab of
+        [ viewMaybe viewTracked (trackedView model)
+        , viewTabs model.tabs
+        , case Pivot.getC model.tabs of
             RecentTab ->
                 --viewTimeLine
                 --    model.activity
@@ -275,10 +276,11 @@ view model =
         ]
 
 
-viewNavHeader currentTab =
+viewTabs : Pivot Tab -> Html Msg
+viewTabs tabs =
     let
-        toClassString tab =
-            if tab == currentTab then
+        toClassString isSelected =
+            if isSelected then
                 "blue no-underline"
 
             else
@@ -293,23 +295,22 @@ viewNavHeader currentTab =
                 RecentTab ->
                     "TimelineRoute"
 
-        viewTabHeader tab =
+        viewTabHeader : Bool -> Tab -> Html Msg
+        viewTabHeader isSelected tab =
             a
                 [ class "mr2"
-                , class <| toClassString tab
+                , class <| toClassString isSelected
                 , href "/projects"
                 , onClickPreventDefault (OnNavLinkClicked tab)
                 ]
                 [ text <| toTitle tab ]
 
-        tabList =
-            [ RecentTab, ProjectsTab ]
-
-        links =
-            tabList
-                |> List.map viewTabHeader
+        tabsView =
+            tabs
+                |> Pivot.mapCS (viewTabHeader True) (viewTabHeader False)
+                |> Pivot.toList
     in
-    row [ class "pv2" ] links
+    row [ class "pv2" ] tabsView
 
 
 type alias LogView =
