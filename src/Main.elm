@@ -1,6 +1,5 @@
 module Main exposing (main)
 
-import Basics.Extra exposing (flip)
 import Date exposing (Date)
 import Dict exposing (Dict)
 import Html exposing (Html, a, button, option, select, text)
@@ -13,7 +12,6 @@ import Json.Encode as JE exposing (Value)
 import List.Extra
 import Log exposing (Log)
 import LogDict exposing (LogDict)
-import LogId
 import Pivot exposing (Pivot)
 import Port
 import Project exposing (Project)
