@@ -189,9 +189,10 @@ cacheLogDict model =
     Port.cacheLogDict (LogDict.encoder model.logDict)
 
 
-stopTracking : Posix -> Model -> Model
+stopTracking : Posix -> Model -> ( Model, Cmd Msg )
 stopTracking now =
     recordCurrentActivityAndSetTo now Nothing
+        >> with cacheLogDict addCmd
 
 
 
@@ -200,7 +201,7 @@ stopTracking now =
 
 type Msg
     = NoOp
-    | OnNavLinkClicked Tab
+    | OnTabClicked Tab
     | GotNowForView Posix
     | GotHere Zone
     | TrackProjectClicked ProjectId
@@ -215,8 +216,13 @@ update message model =
         NoOp ->
             ( model, Cmd.none )
 
-        OnNavLinkClicked tab ->
-            ( { model | tabs = Pivot.withRollback (Pivot.firstWith (is tab)) model.tabs }, Cmd.none )
+        OnTabClicked tab ->
+            ( { model
+                | tabs =
+                    Pivot.withRollback (Pivot.firstWith (is tab)) model.tabs
+              }
+            , Cmd.none
+            )
 
         GotHere here ->
             ( { model | here = here }, Cmd.none )
@@ -227,14 +233,14 @@ update message model =
         TrackProjectClicked pid ->
             ( model, trackProjectIdCmd pid )
 
+        StopClicked ->
+            ( model, Time.now |> Task.perform StopTrackingWithNow )
+
         StartTrackWithNow projectId start ->
             startTracking projectId start model
 
         StopTrackingWithNow now ->
-            ( stopTracking now model, Cmd.none )
-
-        StopClicked ->
-            ( model, Time.now |> Task.perform StopTrackingWithNow )
+            stopTracking now model
 
 
 startActivityTitled : String -> Model -> ( Model, Cmd Msg )
@@ -310,7 +316,7 @@ viewTabs tabs =
                         "bg-moon-gray"
                     )
                 , class "pointer no-selection"
-                , onClickPreventDefault (OnNavLinkClicked tab)
+                , onClickPreventDefault (OnTabClicked tab)
                 ]
                 [ text <| toTitle tab ]
 
