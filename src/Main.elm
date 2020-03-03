@@ -10,6 +10,7 @@ import Html.Events.Extra exposing (onClickPreventDefault)
 import Html.Extra exposing (viewMaybe)
 import List.Extra
 import Log exposing (Log)
+import LogDict exposing (LogDict)
 import Pivot exposing (Pivot)
 import Project exposing (Project)
 import ProjectId exposing (ProjectId)
@@ -19,6 +20,7 @@ import Time exposing (Posix, Zone)
 import TimeTravel.Browser
 import TypedTime exposing (TypedTime)
 import Update.Pipeline exposing (..)
+import Utils exposing (is, propEq)
 
 
 
@@ -46,45 +48,12 @@ findProject projectId =
 
 findProjectTitled : String -> ProjectDict -> Maybe Project
 findProjectTitled title =
-    Dict.values >> List.Extra.find (Project.title >> is title)
+    Dict.values >> List.Extra.find (propEq Project.title title)
 
 
 insertProject : Project -> ProjectDict -> ProjectDict
 insertProject project =
     Dict.insert (Project.idString project) project
-
-
-
--- LOG DICT
-
-
-type alias LogDict =
-    Dict String Log
-
-
-insertLog : Log -> LogDict -> LogDict
-insertLog log =
-    Dict.insert (Log.idString log) log
-
-
-logsForProjectIdOnDate : Zone -> Date -> ProjectId -> LogDict -> List Log
-logsForProjectIdOnDate zone date projectId =
-    Dict.values
-        >> List.filter
-            (allPass
-                [ Log.projectId >> is projectId
-                , Log.startDate zone >> Date.isBetween date date
-                ]
-            )
-
-
-allPass : List (a -> Bool) -> a -> Bool
-allPass list a =
-    List.all ((|>) a) list
-
-
-is =
-    (==)
 
 
 
@@ -173,12 +142,14 @@ insertNewProject title model =
 
 insertNewLogEntry : ProjectId -> Posix -> Posix -> Model -> Model
 insertNewLogEntry projectId start end model =
-    case Random.step (Log.generator projectId start end) model.seed of
-        ( log, seed ) ->
-            { model
-                | logDict = insertLog log model.logDict
-                , seed = seed
-            }
+    let
+        logDictGen : Generator LogDict
+        logDictGen =
+            LogDict.insertGenerator (Log.generator projectId start end) model.logDict
+    in
+    case Random.step logDictGen model.seed of
+        ( logDict, seed ) ->
+            { model | logDict = logDict, seed = seed }
 
 
 setActivity activity model =
@@ -516,7 +487,7 @@ trackedView model =
                         let
                             millisLoggedToday : TypedTime
                             millisLoggedToday =
-                                logsForProjectIdOnDate model.here
+                                LogDict.logsForProjectIdOnDate model.here
                                     (Date.fromPosix model.here model.nowForView)
                                     activity.pid
                                     model.logDict
