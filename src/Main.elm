@@ -156,15 +156,15 @@ setActivity activity model =
     { model | activity = activity }
 
 
+logGeneratorForActivity : Posix -> Activity -> Generator Log
+logGeneratorForActivity now activity =
+    Log.generator activity.pid activity.start now
+
+
 recordCurrentActivityAndSetTo : Posix -> Maybe Activity -> Model -> Model
 recordCurrentActivityAndSetTo now newActivity model =
-    (case model.activity of
-        Just activity ->
-            let
-                logGenerator : Generator Log
-                logGenerator =
-                    Log.generator activity.pid activity.start now
-            in
+    (case model.activity |> Maybe.map (logGeneratorForActivity now) of
+        Just logGenerator ->
             insertNewLogEntry logGenerator model
 
         Nothing ->
