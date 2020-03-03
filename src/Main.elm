@@ -132,6 +132,7 @@ init { now } =
     )
         |> andThen
             (flip (List.foldl insertNewProject) mockProjectNames
+                >> insertMockLogEntries
                 >> startActivityTitled currentMockProjectTitle
             )
 
