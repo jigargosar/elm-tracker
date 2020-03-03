@@ -1,5 +1,6 @@
 module Main exposing (main)
 
+import Basics.Extra exposing (flip)
 import Date exposing (Date)
 import Dict exposing (Dict)
 import Html exposing (Html, a, button, text)
@@ -124,11 +125,17 @@ init { now } =
     , Time.here |> Task.perform GotHere
     )
         |> andThen
-            (insertNewProject "P1"
-                >> insertNewProject "P2"
-                >> insertNewProject "P3"
+            (flip (List.foldl insertNewProject) mockProjectNames
                 >> startFirstActivity
             )
+
+
+mockProjectNames =
+    [ "Read Elm in action"
+    , "Clone Toggle"
+    , "Prepare for JP"
+    , "Emails"
+    ]
 
 
 
