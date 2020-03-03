@@ -293,7 +293,7 @@ viewNavHeader currentTab =
                 RecentTab ->
                     "TimelineRoute"
 
-        link tab =
+        viewTabHeader tab =
             a
                 [ class "mr2"
                 , class <| toClassString tab
@@ -302,9 +302,12 @@ viewNavHeader currentTab =
                 ]
                 [ text <| toTitle tab ]
 
+        tabList =
+            [ RecentTab, ProjectsTab ]
+
         links =
             [ RecentTab, ProjectsTab ]
-                |> List.map link
+                |> List.map viewTabHeader
     in
     row [ class "pv2" ] links
 
