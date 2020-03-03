@@ -1,7 +1,7 @@
 module ProjectId exposing (ProjectId, decoder, encoder, generator, toString)
 
 import IdGenerator
-import Json.Decode as JD exposing (Decoder)
+import Json.Decode exposing (Decoder)
 import Json.Encode as JE exposing (Value)
 import Random exposing (Generator)
 
