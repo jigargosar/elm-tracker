@@ -16,6 +16,7 @@ import ProjectId exposing (ProjectId)
 import Random exposing (Generator, Seed)
 import Task
 import Time exposing (Posix, Zone)
+import Time.Extra
 import TimeTravel.Browser
 import TypedTime exposing (TypedTime)
 import Update.Pipeline exposing (..)
@@ -133,6 +134,32 @@ init { now } =
             (flip (List.foldl insertNewProject) mockProjectNames
                 >> startActivityTitled currentMockProjectTitle
             )
+
+
+insertMockLogEntries : Model -> Model
+insertMockLogEntries model =
+    insertMockLogEntriesHelp (getAllProjects model) model.here model.nowForView model
+
+
+insertMockLogEntriesHelp : List Project -> Zone -> Posix -> Model -> Model
+insertMockLogEntriesHelp projects zone now =
+    let
+        addMinutes : Int -> Posix -> Posix
+        addMinutes n =
+            Time.Extra.add Time.Extra.Minute n zone
+
+        insertLogsForProject : Project -> Model -> Model
+        insertLogsForProject project =
+            let
+                start =
+                    addMinutes -10 now
+
+                end =
+                    addMinutes 5 start
+            in
+            insertNewLogEntry (Project.id project) start end
+    in
+    flip (List.foldl insertLogsForProject) projects
 
 
 mockProjectNames =

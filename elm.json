@@ -18,6 +18,7 @@
             "elm-community/list-extra": "8.2.3",
             "elm-community/maybe-extra": "5.1.0",
             "justinmimbs/date": "3.2.0",
+            "justinmimbs/time-extra": "1.1.0",
             "jxxcarlson/elm-typed-time": "1.2.0",
             "laserpants/elm-update-pipeline": "1.1.0",
             "savardd/elm-time-travel": "2.0.0",
