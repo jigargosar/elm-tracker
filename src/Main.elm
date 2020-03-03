@@ -107,7 +107,7 @@ type alias Model =
     , nowForView : Posix
     , here : Zone
     , seed : Seed
-    , route : Page
+    , page : Page
     }
 
 
@@ -127,7 +127,7 @@ init { now } =
             , nowForView = Time.millisToPosix now
             , here = Time.utc
             , activity = Nothing
-            , route = TimelinePage
+            , page = TimelinePage
             }
     in
     ( model
@@ -218,7 +218,7 @@ update message model =
             ( model, Cmd.none )
 
         OnNavLinkClicked route ->
-            ( { model | route = route }, Cmd.none )
+            ( { model | page = route }, Cmd.none )
 
         GotHere here ->
             ( { model | here = here }, Cmd.none )
@@ -268,9 +268,9 @@ subscriptions _ =
 view : Model -> Html Msg
 view model =
     column [ class "measure-narrow center ph2 pv2" ]
-        [ viewNavHeader model.route
+        [ viewNavHeader model.page
         , viewMaybe viewTracked (trackedView model)
-        , case model.route of
+        , case model.page of
             ProjectListPage ->
                 viewTimeLine model.here model.projectDict (Dict.values model.logDict)
 
