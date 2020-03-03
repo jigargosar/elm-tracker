@@ -202,6 +202,7 @@ stopTracking now model =
 
 type Msg
     = NoOp
+    | OnNavLinkClicked Route
     | GotNowForView Posix
     | GotHere Zone
     | TrackProjectClicked ProjectId
@@ -215,6 +216,9 @@ update message model =
     case message of
         NoOp ->
             ( model, Cmd.none )
+
+        OnNavLinkClicked route ->
+            ( { model | route = route }, Cmd.none )
 
         GotHere here ->
             ( { model | here = here }, Cmd.none )
@@ -278,13 +282,6 @@ view model =
 
 viewNavHeader currentRoute =
     let
-        toMsg route =
-            if route == currentRoute then
-                NoOp
-
-            else
-                NoOp
-
         toClassString route =
             if route == currentRoute then
                 "blue no-underline"
@@ -306,7 +303,7 @@ viewNavHeader currentRoute =
                 [ class "mr2"
                 , class <| toClassString route
                 , href "/projects"
-                , onClickPreventDefault (toMsg route)
+                , onClickPreventDefault (OnNavLinkClicked route)
                 ]
                 [ text <| toTitle route ]
 
