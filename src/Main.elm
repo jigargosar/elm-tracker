@@ -143,9 +143,12 @@ insertNewProject title model =
 insertNewLogEntry : ProjectId -> Posix -> Posix -> Model -> Model
 insertNewLogEntry projectId start end model =
     let
+        logGenerator =
+            Log.generator projectId start end
+
         logDictGen : Generator LogDict
         logDictGen =
-            LogDict.insertGenerator (Log.generator projectId start end) model.logDict
+            LogDict.insertGenerator logGenerator model.logDict
     in
     case Random.step logDictGen model.seed of
         ( logDict, seed ) ->
