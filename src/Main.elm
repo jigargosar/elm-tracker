@@ -279,28 +279,26 @@ view model =
 viewTabs : Pivot Tab -> Html Msg
 viewTabs tabs =
     let
-        toClassString isSelected =
-            if isSelected then
-                "blue no-underline"
-
-            else
-                "black"
-
         toTitle : Tab -> String
         toTitle tab =
             case tab of
                 ProjectsTab ->
-                    "ProjectListRoute"
+                    "Projects"
 
                 RecentTab ->
-                    "TimelineRoute"
+                    "Recent"
 
         viewTabHeader : Bool -> Tab -> Html Msg
         viewTabHeader isSelected tab =
-            a
-                [ class "mr2"
-                , class <| toClassString isSelected
-                , href "/projects"
+            row
+                [ class "pa1"
+                , class
+                    (if isSelected then
+                        "bg-white black no-underline"
+
+                     else
+                        ""
+                    )
                 , onClickPreventDefault (OnNavLinkClicked tab)
                 ]
                 [ text <| toTitle tab ]
@@ -310,7 +308,7 @@ viewTabs tabs =
                 |> Pivot.mapCS (viewTabHeader True) (viewTabHeader False)
                 |> Pivot.toList
     in
-    row [ class "pv2" ] tabsView
+    row [ class "pv2 justify-around bg-black white" ] tabsView
 
 
 type alias LogView =
