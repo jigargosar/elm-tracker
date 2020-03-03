@@ -27,6 +27,15 @@ const { pathOr, identity } = require('ramda')
   cacheLogDict(function(logDict) {
     localStorage.setItem('logDict', JSON.stringify(logDict))
   })
+
+  const cacheProjectDict = pathOr(identity, [
+    'ports',
+    'cacheProjectDict',
+    'subscribe',
+  ])(app)
+  cacheProjectDict(function(projectDict) {
+    localStorage.setItem('projectDict', JSON.stringify(projectDict))
+  })
 }
 
 function initElmApp() {
@@ -40,6 +49,7 @@ function initElmApp() {
         window.innerHeight - document.body.clientHeight,
       ],
       logDict: JSON.parse(localStorage.getItem('logDict') || '{}'),
+      projectDict: JSON.parse(localStorage.getItem('projectDict') || '{}'),
     },
   })
   return app

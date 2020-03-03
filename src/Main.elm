@@ -83,15 +83,25 @@ type alias Model =
 type alias Flags =
     { now : Int
     , logDict : Value
+    , projectDict : Value
     }
 
 
 init : Flags -> ( Model, Cmd Msg )
-init { now, logDict } =
+init { now, logDict, projectDict } =
     let
         model : Model
         model =
-            { projectDict = Dict.empty
+            { projectDict =
+                case
+                    JD.decodeValue (JD.dict Project.decoder) projectDict
+                        |> Result.mapError (JD.errorToString >> Debug.log "err")
+                of
+                    Err _ ->
+                        Debug.todo "implement decoding error for projectDict"
+
+                    Ok dict ->
+                        dict
             , logDict =
                 case
                     JD.decodeValue LogDict.decoder logDict
@@ -100,8 +110,8 @@ init { now, logDict } =
                     Err _ ->
                         Debug.todo "implement decoding error for logDict"
 
-                    Ok ld ->
-                        ld
+                    Ok dict ->
+                        dict
             , seed = Random.initialSeed now
             , nowForView = Time.millisToPosix now
             , here = Time.utc
