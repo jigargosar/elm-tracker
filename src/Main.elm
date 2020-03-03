@@ -44,6 +44,11 @@ findProject projectId =
     Dict.get (ProjectId.toString projectId)
 
 
+findProjectTitled : String -> ProjectDict -> Maybe Project
+findProjectTitled title =
+    Dict.values >> List.Extra.find (Project.title >> is title)
+
+
 insertProject : Project -> ProjectDict -> ProjectDict
 insertProject project =
     Dict.insert (Project.idString project) project
@@ -126,7 +131,7 @@ init { now } =
     )
         |> andThen
             (flip (List.foldl insertNewProject) mockProjectNames
-                >> startFirstActivity
+                >> startActivityTitled currentMockProjectTitle
             )
 
 
@@ -135,8 +140,12 @@ mockProjectNames =
     , "Clone Toggle"
     , "Prepare for JP"
     , "Emails"
-    , "Add Mock Logs"
+    , currentMockProjectTitle
     ]
+
+
+currentMockProjectTitle =
+    "Add Mock Logs"
 
 
 
@@ -239,9 +248,9 @@ update message model =
             ( model, Time.now |> Task.perform StopTrackingWithNow )
 
 
-startFirstActivity : Model -> ( Model, Cmd Msg )
-startFirstActivity model =
-    case getAllProjects model |> List.head of
+startActivityTitled : String -> Model -> ( Model, Cmd Msg )
+startActivityTitled title model =
+    case findProjectTitled title model.projectDict of
         Just p ->
             ( model, trackProjectIdCmd (Project.id p) )
 
