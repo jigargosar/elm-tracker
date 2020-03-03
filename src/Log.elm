@@ -2,7 +2,7 @@ module Log exposing
     ( Log, generator
     , idString, projectId
     , startDate, endMillis
-    , tracked
+    , sumTracked
     )
 
 {-|
@@ -12,6 +12,8 @@ module Log exposing
 @docs idString, projectId
 
 @docs startDate, endMillis
+
+@docs sumTracked
 
 -}
 
@@ -72,6 +74,11 @@ endMillis =
 tracked : Log -> TypedTime
 tracked =
     trackedMillis >> toFloat >> TypedTime.milliseconds
+
+
+sumTracked : List Log -> TypedTime
+sumTracked =
+    List.foldl (tracked >> TypedTime.add) TypedTime.zero
 
 
 
