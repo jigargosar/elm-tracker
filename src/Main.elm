@@ -85,9 +85,9 @@ is =
 -- Model
 
 
-type Page
-    = TimelinePage
-    | ProjectListPage
+type Tab
+    = RecentTab
+    | ProjectsTab
 
 
 type alias Model =
@@ -97,7 +97,7 @@ type alias Model =
     , nowForView : Posix
     , here : Zone
     , seed : Seed
-    , page : Page
+    , tab : Tab
     }
 
 
@@ -117,7 +117,7 @@ init { now } =
             , nowForView = Time.millisToPosix now
             , here = Time.utc
             , activity = Nothing
-            , page = TimelinePage
+            , tab = RecentTab
             }
     in
     ( model
@@ -192,7 +192,7 @@ stopTracking now model =
 
 type Msg
     = NoOp
-    | OnNavLinkClicked Page
+    | OnNavLinkClicked Tab
     | GotNowForView Posix
     | GotHere Zone
     | TrackProjectClicked ProjectId
@@ -208,7 +208,7 @@ update message model =
             ( model, Cmd.none )
 
         OnNavLinkClicked route ->
-            ( { model | page = route }, Cmd.none )
+            ( { model | tab = route }, Cmd.none )
 
         GotHere here ->
             ( { model | here = here }, Cmd.none )
@@ -258,18 +258,19 @@ subscriptions _ =
 view : Model -> Html Msg
 view model =
     column [ class "measure-narrow center ph2 pv2" ]
-        [ viewNavHeader model.page
+        [ viewNavHeader model.tab
         , viewMaybe viewTracked (trackedView model)
-        , case model.page of
-            TimelinePage ->
-                viewTimeLine
-                    model.activity
-                    (Date.fromPosix model.here model.nowForView)
-                    model.here
-                    model.projectDict
-                    (Dict.values model.logDict)
+        , case model.tab of
+            RecentTab ->
+                --viewTimeLine
+                --    model.activity
+                --    (Date.fromPosix model.here model.nowForView)
+                --    model.here
+                --    model.projectDict
+                --    (Dict.values model.logDict)
+                column [] [ text "RECENT ENTRIES" ]
 
-            ProjectListPage ->
+            ProjectsTab ->
                 column [] (viewProjectList (getAllProjects model))
         ]
 
@@ -283,13 +284,13 @@ viewNavHeader currentRoute =
             else
                 "black"
 
-        toTitle : Page -> String
-        toTitle route =
-            case route of
-                ProjectListPage ->
+        toTitle : Tab -> String
+        toTitle tab =
+            case tab of
+                ProjectsTab ->
                     "ProjectListRoute"
 
-                TimelinePage ->
+                RecentTab ->
                     "TimelineRoute"
 
         link route =
@@ -302,7 +303,7 @@ viewNavHeader currentRoute =
                 [ text <| toTitle route ]
 
         links =
-            [ TimelinePage, ProjectListPage ]
+            [ RecentTab, ProjectsTab ]
                 |> List.map link
     in
     row [ class "pv2" ] links
@@ -369,76 +370,78 @@ gatherLogsByDateThenAggregateLogDurationByProjectId zone =
         >> List.map (Tuple.mapSecond aggregateLogDurationByProjectId)
 
 
-viewTimeLine : Maybe Activity -> Date -> Zone -> ProjectDict -> List Log -> Html Msg
-viewTimeLine activity today zone pd logs =
-    let
-        viewProjectEntry : ( ProjectId, TypedTime ) -> Html Msg
-        viewProjectEntry ( projectId, elapsedTT ) =
-            let
-                formattedTime : String
-                formattedTime =
-                    elapsedTT
-                        |> TypedTime.toString TypedTime.Seconds
 
-                projectTitle : String
-                projectTitle =
-                    findProject projectId pd
-                        |> Maybe.Extra.unwrap "<project-title-not-found-error>" Project.title
-            in
-            row [ class "mv1" ]
-                [ row [ class "pv1 mr2 flex-grow-1" ] [ text projectTitle ]
-                , column [ class "pv1 mr2" ] [ text formattedTime ]
-                , button
-                    [ class "pointer bn pv1 ph2"
-                    , onClick <| TrackProjectClicked projectId
-                    ]
-                    [ text "|>" ]
-                ]
-
-        dateToString : Date -> String
-        dateToString date =
-            if date == today then
-                "Today"
-
-            else
-                Date.format "E ddd MMM y" date
-
-        viewDateGroup : ( Date, List ( ProjectId, TypedTime ) ) -> Html Msg
-        viewDateGroup ( date, projectEntryList ) =
-            let
-                filterPE ( pid, _ ) =
-                    case ( date == today, activity ) of
-                        ( True, Just act ) ->
-                            if act.pid == pid then
-                                False
-
-                            else
-                                True
-
-                        _ ->
-                            True
-
-                entryViews =
-                    projectEntryList
-                        |> List.filter filterPE
-                        |> List.map viewProjectEntry
-            in
-            case entryViews of
-                [] ->
-                    nothing
-
-                _ ->
-                    column [ class "pv2" ]
-                        (row [ class "f4" ] [ text (dateToString date) ]
-                            :: entryViews
-                        )
-
-        dateGroupsList =
-            logs
-                |> gatherLogsByDateThenAggregateLogDurationByProjectId zone
-                |> List.map viewDateGroup
-    in
-    column [] dateGroupsList
+--viewTimeLine : Maybe Activity -> Date -> Zone -> ProjectDict -> List Log -> Html Msg
+--viewTimeLine activity today zone pd logs =
+--    let
+--        viewProjectEntry : ( ProjectId, TypedTime ) -> Html Msg
+--        viewProjectEntry ( projectId, elapsedTT ) =
+--            let
+--                formattedTime : String
+--                formattedTime =
+--                    elapsedTT
+--                        |> TypedTime.toString TypedTime.Seconds
+--
+--                projectTitle : String
+--                projectTitle =
+--                    findProject projectId pd
+--                        |> Maybe.Extra.unwrap "<project-title-not-found-error>" Project.title
+--            in
+--            row [ class "mv1" ]
+--                [ row [ class "pv1 mr2 flex-grow-1" ] [ text projectTitle ]
+--                , column [ class "pv1 mr2" ] [ text formattedTime ]
+--                , button
+--                    [ class "pointer bn pv1 ph2"
+--                    , onClick <| TrackProjectClicked projectId
+--                    ]
+--                    [ text "|>" ]
+--                ]
+--
+--        dateToString : Date -> String
+--        dateToString date =
+--            if date == today then
+--                "Today"
+--
+--            else
+--                Date.format "E ddd MMM y" date
+--
+--        viewDateGroup : ( Date, List ( ProjectId, TypedTime ) ) -> Html Msg
+--        viewDateGroup ( date, projectEntryList ) =
+--            let
+--                filterPE ( pid, _ ) =
+--                    case ( date == today, activity ) of
+--                        ( True, Just act ) ->
+--                            if act.pid == pid then
+--                                False
+--
+--                            else
+--                                True
+--
+--                        _ ->
+--                            True
+--
+--                entryViews =
+--                    projectEntryList
+--                        |> List.filter filterPE
+--                        |> List.map viewProjectEntry
+--            in
+--            case entryViews of
+--                [] ->
+--                    nothing
+--
+--                _ ->
+--                    column [ class "pv2" ]
+--                        (row [ class "f4" ] [ text (dateToString date) ]
+--                            :: entryViews
+--                        )
+--
+--        dateGroupsList =
+--            logs
+--                |> gatherLogsByDateThenAggregateLogDurationByProjectId zone
+--                |> List.map viewDateGroup
+--    in
+--    column [] dateGroupsList
+--
 
 
 trackedView : Model -> Maybe ActivityView
