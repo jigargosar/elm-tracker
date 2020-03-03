@@ -32,4 +32,4 @@ encoder (ProjectId str) =
 
 decoder : Decoder ProjectId
 decoder =
-    JD.map ProjectId JD.string
+    IdGenerator.decodeWhenPrefixed prefix ProjectId
