@@ -293,7 +293,7 @@ viewTabs tabs =
             row
                 [ class "pv1 ph3 flex-auto"
                 , class "mid-gray"
-                , class "bt br--top br2 b--transparent"
+                , class "bt br--top br2 bw1 b--transparent"
                 , class
                     (if isSelected then
                         "bg-mid-gray white"
