@@ -3,13 +3,11 @@ module Main exposing (main)
 import Date exposing (Date)
 import Dict exposing (Dict)
 import Html exposing (Html, a, button, text)
-import Html.Attributes exposing (class, href)
+import Html.Attributes exposing (class)
 import Html.Events exposing (onClick)
 import Html.Events.Extra exposing (onClickPreventDefault)
-import Html.Extra exposing (nothing, viewMaybe)
-import List.Extra
+import Html.Extra exposing (viewMaybe)
 import Log exposing (Log)
-import Maybe.Extra
 import Pivot exposing (Pivot)
 import Project exposing (Project)
 import ProjectId exposing (ProjectId)
@@ -132,9 +130,11 @@ init { now } =
             )
 
 
-getAllSortedLogsEntries : Model -> List Log
-getAllSortedLogsEntries =
-    .logDict >> Dict.values >> List.sortBy Log.endMillis
+
+--getAllSortedLogsEntries : Model -> List Log
+--getAllSortedLogsEntries =
+--    .logDict >> Dict.values >> List.sortBy Log.endMillis
+--
 
 
 getAllProjects : Model -> List Project
@@ -320,61 +320,57 @@ type alias LogView =
     }
 
 
-toLogView : Zone -> ProjectDict -> Log -> Maybe LogView
-toLogView zone pd log =
-    Maybe.map
-        (\project ->
-            { log = log
-            , project = project
-            , startDate = Log.startDate zone log
-            }
-        )
-        (findProject (Log.projectId log) pd)
 
-
-toLogViewList : Zone -> ProjectDict -> List Log -> List LogView
-toLogViewList zone pd =
-    List.filterMap (toLogView zone pd)
-
-
-aggregateLogDurationByProject : List { a | project : Project, log : Log } -> List ( Project, TypedTime )
-aggregateLogDurationByProject =
-    List.Extra.gatherEqualsBy (.project >> Project.id)
-        >> List.map
-            (\( f, r ) ->
-                ( f.project
-                , f :: r |> List.map .log |> Log.sumTracked
-                )
-            )
-        >> List.sortBy (Tuple.second >> TypedTime.toSeconds >> negate)
-
-
-gatherLogsByDate : Zone -> List Log -> List ( Date, List Log )
-gatherLogsByDate zone =
-    List.Extra.gatherEqualsBy (Log.startDate zone)
-        >> List.map (\( f, r ) -> ( Log.startDate zone f, f :: r ))
-        >> List.sortBy (Tuple.first >> Date.toRataDie >> negate)
-
-
-aggregateLogDurationByProjectId : List Log -> List ( ProjectId, TypedTime )
-aggregateLogDurationByProjectId =
-    List.Extra.gatherEqualsBy Log.projectId
-        >> List.map
-            (\( f, r ) ->
-                ( Log.projectId f
-                , f :: r |> Log.sumTracked
-                )
-            )
-        >> List.sortBy (Tuple.second >> TypedTime.toSeconds >> negate)
-
-
-gatherLogsByDateThenAggregateLogDurationByProjectId : Zone -> List Log -> List ( Date, List ( ProjectId, TypedTime ) )
-gatherLogsByDateThenAggregateLogDurationByProjectId zone =
-    gatherLogsByDate zone
-        >> List.map (Tuple.mapSecond aggregateLogDurationByProjectId)
-
-
-
+--toLogView : Zone -> ProjectDict -> Log -> Maybe LogView
+--toLogView zone pd log =
+--    Maybe.map
+--        (\project ->
+--            { log = log
+--            , project = project
+--            , startDate = Log.startDate zone log
+--            }
+--        )
+--        (findProject (Log.projectId log) pd)
+--
+--toLogViewList : Zone -> ProjectDict -> List Log -> List LogView
+--toLogViewList zone pd =
+--    List.filterMap (toLogView zone pd)
+--
+--
+--aggregateLogDurationByProject : List { a | project : Project, log : Log } -> List ( Project, TypedTime )
+--aggregateLogDurationByProject =
+--    List.Extra.gatherEqualsBy (.project >> Project.id)
+--        >> List.map
+--            (\( f, r ) ->
+--                ( f.project
+--                , f :: r |> List.map .log |> Log.sumTracked
+--                )
+--            )
+--        >> List.sortBy (Tuple.second >> TypedTime.toSeconds >> negate)
+--
+--gatherLogsByDate : Zone -> List Log -> List ( Date, List Log )
+--gatherLogsByDate zone =
+--    List.Extra.gatherEqualsBy (Log.startDate zone)
+--        >> List.map (\( f, r ) -> ( Log.startDate zone f, f :: r ))
+--        >> List.sortBy (Tuple.first >> Date.toRataDie >> negate)
+--
+--
+--aggregateLogDurationByProjectId : List Log -> List ( ProjectId, TypedTime )
+--aggregateLogDurationByProjectId =
+--    List.Extra.gatherEqualsBy Log.projectId
+--        >> List.map
+--            (\( f, r ) ->
+--                ( Log.projectId f
+--                , f :: r |> Log.sumTracked
+--                )
+--            )
+--        >> List.sortBy (Tuple.second >> TypedTime.toSeconds >> negate)
+--
+--gatherLogsByDateThenAggregateLogDurationByProjectId : Zone -> List Log -> List ( Date, List ( ProjectId, TypedTime ) )
+--gatherLogsByDateThenAggregateLogDurationByProjectId zone =
+--    gatherLogsByDate zone
+--        >> List.map (Tuple.mapSecond aggregateLogDurationByProjectId)
+--
 --viewTimeLine : Maybe Activity -> Date -> Zone -> ProjectDict -> List Log -> Html Msg
 --viewTimeLine activity today zone pd logs =
 --    let
