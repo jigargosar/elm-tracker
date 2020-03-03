@@ -3,6 +3,7 @@ module Log exposing
     , idString, projectId
     , startDate, endMillis
     , sumTracked
+    , startMillis
     )
 
 {-|
@@ -66,6 +67,11 @@ startDate zone =
     start >> Date.fromPosix zone
 
 
+startMillis : Log -> Int
+startMillis =
+    start >> Time.posixToMillis
+
+
 endMillis : Log -> Int
 endMillis =
     end >> Time.posixToMillis
@@ -83,11 +89,6 @@ sumTracked =
 
 
 -- PRIVATE
-
-
-startMillis : Log -> Int
-startMillis =
-    start >> Time.posixToMillis
 
 
 trackedMillis : Log -> Int

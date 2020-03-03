@@ -7,6 +7,7 @@ import Html.Attributes exposing (class)
 import Html.Events exposing (onClick)
 import Html.Events.Extra exposing (onClickPreventDefault)
 import Html.Extra exposing (viewMaybe)
+import List.Extra
 import Log exposing (Log)
 import Pivot exposing (Pivot)
 import Project exposing (Project)
@@ -313,9 +314,19 @@ viewTabs tabs =
     column [ class "pv2 " ] [ row [ class "ph2 bb b--mid-gray justify-around" ] tabsView ]
 
 
+eqBy f a b =
+    f a == f b
+
+
 viewRecentLogs : List Log -> Html msg
 viewRecentLogs logs =
     let
+        recentGroups : List ( Log, List Log )
+        recentGroups =
+            logs
+                |> List.sortBy Log.startMillis
+                |> List.Extra.groupWhile (eqBy Log.projectId)
+
         viewL l =
             row [] [ text <| Debug.toString l ]
     in
