@@ -15,7 +15,7 @@ import Random exposing (Generator, Seed)
 import Task
 import Time exposing (Posix, Zone)
 import TimeTravel.Browser
-import TypedTime
+import TypedTime exposing (TypedTime)
 import Update.Pipeline exposing (..)
 
 
@@ -31,9 +31,14 @@ type alias Log =
     }
 
 
-logDurationInMillis : Log -> Int
-logDurationInMillis log =
-    elapsedMillisFromToPosix log.start log.end
+logDuration : Log -> TypedTime
+logDuration =
+    let
+        logDurationInMillis : Log -> Int
+        logDurationInMillis log =
+            elapsedMillisFromToPosix log.start log.end
+    in
+    logDurationInMillis >> toFloat >> TypedTime.milliseconds
 
 
 logGen : Activity -> Posix -> Generator Log
@@ -296,7 +301,7 @@ view model =
         , viewLogsGroupedByDate model.here model.projectDict (Dict.values model.logDict)
         , viewDebugList "DEBUG: Log Duration"
             (getAllSortedLogsEntries model
-                |> List.map logDurationInMillis
+                |> List.map logDuration
             )
         , viewDebugList "DEBUG: ALL PROJECTS" (getAllProjects model)
         , viewDebugList "DEBUG: ALL LOG ENTRIES" (getAllSortedLogsEntries model)
@@ -327,16 +332,16 @@ toLogViewList zone pd =
     List.filterMap (toLogView zone pd)
 
 
-aggregateLogDurationByProject : List { a | project : Project, log : Log } -> List ( Project, Int )
+aggregateLogDurationByProject : List { a | project : Project, log : Log } -> List ( Project, TypedTime )
 aggregateLogDurationByProject =
     List.Extra.gatherEqualsBy (.project >> Project.id)
         >> List.map
             (\( f, r ) ->
                 ( f.project
-                , f :: r |> List.map (.log >> logDurationInMillis) |> List.sum
+                , f :: r |> List.map (.log >> logDuration) |> List.foldl TypedTime.add TypedTime.zero
                 )
             )
-        >> List.sortBy (Tuple.second >> negate)
+        >> List.sortBy (Tuple.second >> TypedTime.toSeconds >> negate)
 
 
 gatherLogsByDate : Zone -> List Log -> List ( Date, List Log )
@@ -346,19 +351,19 @@ gatherLogsByDate zone =
         >> List.sortBy (Tuple.first >> Date.toRataDie >> negate)
 
 
-aggregateLogDurationByProjectId : List Log -> List ( ProjectId, Int )
+aggregateLogDurationByProjectId : List Log -> List ( ProjectId, TypedTime )
 aggregateLogDurationByProjectId =
     List.Extra.gatherEqualsBy .pid
         >> List.map
             (\( f, r ) ->
                 ( f.pid
-                , f :: r |> List.map logDurationInMillis |> List.sum
+                , f :: r |> List.foldl (logDuration >> TypedTime.add) TypedTime.zero
                 )
             )
-        >> List.sortBy (Tuple.second >> negate)
+        >> List.sortBy (Tuple.second >> TypedTime.toSeconds >> negate)
 
 
-gatherLogsByDateThenAggregateLogDurationByProjectId : Zone -> List Log -> List ( Date, List ( ProjectId, Int ) )
+gatherLogsByDateThenAggregateLogDurationByProjectId : Zone -> List Log -> List ( Date, List ( ProjectId, TypedTime ) )
 gatherLogsByDateThenAggregateLogDurationByProjectId zone =
     gatherLogsByDate zone
         >> List.map (Tuple.mapSecond aggregateLogDurationByProjectId)
@@ -367,14 +372,15 @@ gatherLogsByDateThenAggregateLogDurationByProjectId zone =
 viewTimeLine : Zone -> ProjectDict -> List Log -> Html Msg
 viewTimeLine zone pd =
     let
-        viewProjectEntry ( projectId, durationInMillis ) =
+        viewProjectEntry : ( ProjectId, TypedTime ) -> Html Msg
+        viewProjectEntry ( projectId, elapsedTT ) =
             let
+                formattedTime : String
                 formattedTime =
-                    durationInMillis
-                        |> toFloat
-                        |> TypedTime.milliseconds
+                    elapsedTT
                         |> TypedTime.toString TypedTime.Seconds
 
+                projectTitle : String
                 projectTitle =
                     findProject projectId pd
                         |> Maybe.Extra.unwrap "<project-title-not-found-error>" Project.title
@@ -389,6 +395,7 @@ viewTimeLine zone pd =
                     [ text "|>" ]
                 ]
 
+        viewDateGroup : ( Date, List ( ProjectId, TypedTime ) ) -> Html Msg
         viewDateGroup ( date, projectEntryList ) =
             column [ class "pv2" ]
                 (row [ class "f4" ] [ text (Date.format "E ddd MMM y" date) ]
@@ -403,7 +410,7 @@ viewTimeLine zone pd =
 viewLogsGroupedByDate : Zone -> ProjectDict -> List Log -> Html msg
 viewLogsGroupedByDate zone pd allLogs =
     let
-        logViewsByDateAndThenByProject : List ( Date, List ( Project, Int ) )
+        logViewsByDateAndThenByProject : List ( Date, List ( Project, TypedTime ) )
         logViewsByDateAndThenByProject =
             allLogs
                 |> toLogViewList zone pd
@@ -417,21 +424,18 @@ viewLogsGroupedByDate zone pd allLogs =
                 |> List.sortBy (Tuple.first >> Date.toRataDie)
                 |> List.map (Tuple.mapSecond aggregateLogDurationByProject)
 
-        viewProjectEntry : ( Project, Int ) -> Html msg
-        viewProjectEntry ( project, elapsedMillis ) =
+        viewProjectEntry : ( Project, TypedTime ) -> Html msg
+        viewProjectEntry ( project, elapsedTT ) =
             let
                 formattedTime =
-                    elapsedMillis
-                        |> toFloat
-                        |> TypedTime.milliseconds
-                        |> TypedTime.toString TypedTime.Seconds
+                    elapsedTT |> TypedTime.toString TypedTime.Seconds
             in
             row []
                 [ column [ class "flex-auto" ] [ text <| Project.title project ]
                 , column [] [ text formattedTime ]
                 ]
 
-        viewDateGroup : ( Date, List ( Project, Int ) ) -> Html msg
+        viewDateGroup : ( Date, List ( Project, TypedTime ) ) -> Html msg
         viewDateGroup ( date, list ) =
             column [ class "pv2" ]
                 (row [ class "f4" ] [ text (Date.format "E ddd MMM y" date) ]
@@ -450,20 +454,23 @@ trackedView model =
                 Just project ->
                     { pid = activity.pid
                     , title = Project.title project
-                    , millisTrackedToday =
+                    , trackedTimeToday =
                         let
+                            millisLoggedToday : TypedTime
                             millisLoggedToday =
                                 logsForProjectIdOnDate model.here
                                     (Date.fromPosix model.here model.nowForView)
                                     activity.pid
                                     model.logDict
-                                    |> List.map logDurationInMillis
-                                    |> List.sum
+                                    |> List.foldl (logDuration >> TypedTime.add) TypedTime.zero
 
+                            millisTrackedInActivity : TypedTime
                             millisTrackedInActivity =
                                 elapsedMillisFromToPosix activity.start model.nowForView
+                                    |> toFloat
+                                    |> TypedTime.milliseconds
                         in
-                        millisTrackedInActivity + millisLoggedToday
+                        TypedTime.add millisTrackedInActivity millisLoggedToday
                     }
                         |> Just
 
@@ -477,7 +484,7 @@ trackedView model =
 type alias ActivityView =
     { pid : ProjectId
     , title : String
-    , millisTrackedToday : Int
+    , trackedTimeToday : TypedTime
     }
 
 
@@ -486,9 +493,7 @@ viewTracked vm =
     let
         elapsed : String
         elapsed =
-            vm.millisTrackedToday
-                |> toFloat
-                |> TypedTime.milliseconds
+            vm.trackedTimeToday
                 |> TypedTime.toString TypedTime.Seconds
     in
     column [ class "pv2" ]
