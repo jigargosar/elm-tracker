@@ -264,7 +264,12 @@ view : Model -> Html Msg
 view model =
     column [ class "measure-narrow center ph2 pv2" ]
         [ viewMaybe viewTracked (trackedView model)
-        , viewTimeLine model.here model.projectDict (Dict.values model.logDict)
+        , case model.route of
+            ProjectListRoute ->
+                viewTimeLine model.here model.projectDict (Dict.values model.logDict)
+
+            TimelineRoute ->
+                viewTimeLine model.here model.projectDict (Dict.values model.logDict)
         , debugAndOtherViews model
         ]
 
