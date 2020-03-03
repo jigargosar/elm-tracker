@@ -271,7 +271,7 @@ view model =
                 --    model.projectDict
                 --    (Dict.values model.logDict)
                 --column [] [ text "RECENT ENTRIES" ]
-                viewRecentLogs (Dict.values model.logDict)
+                viewRecentLogs model.projectDict (Dict.values model.logDict)
 
             ProjectsTab ->
                 column [] (viewProjectList (getAllProjects model))
@@ -320,17 +320,22 @@ eqBy f a b =
     f a == f b
 
 
-viewRecentLogs : List Log -> Html Msg
-viewRecentLogs logs =
+viewRecentLogs : ProjectDict -> List Log -> Html Msg
+viewRecentLogs pd logs =
     let
-        recentGroups : List ( Log, List Log )
+        recentGroups : List ( Project, List Log )
         recentGroups =
             logs
                 |> List.sortBy Log.startMillis
                 |> List.Extra.groupWhile (eqBy Log.projectId)
+                |> List.filterMap
+                    (\( l, ls ) ->
+                        findProject (Log.projectId l) pd
+                            |> Maybe.map (\p -> ( p, l :: ls ))
+                    )
 
-        viewL l =
-            row [] [ text <| Debug.toString l ]
+        viewL ( p, ls ) =
+            row [] [ text <| Project.title p ]
     in
     column [] (List.map viewL recentGroups)
 
