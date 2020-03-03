@@ -140,8 +140,8 @@ insertNewProject title model =
             }
 
 
-insertNewLogEntry : Generator Log -> Model -> Model
-insertNewLogEntry logGenerator model =
+insertNewLog : Generator Log -> Model -> Model
+insertNewLog logGenerator model =
     let
         logDictGenerator : Generator LogDict
         logDictGenerator =
@@ -165,7 +165,7 @@ recordCurrentActivityAndSetTo : Posix -> Maybe Activity -> Model -> Model
 recordCurrentActivityAndSetTo now newActivity model =
     (case model.activity |> Maybe.map (logGeneratorForActivity now) of
         Just logGenerator ->
-            insertNewLogEntry logGenerator model
+            insertNewLog logGenerator model
 
         Nothing ->
             model
