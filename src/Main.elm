@@ -140,13 +140,9 @@ insertNewProject title model =
             }
 
 
-insertNewLogEntry : ProjectId -> Posix -> Posix -> Model -> Model
-insertNewLogEntry projectId start end model =
+insertNewLogEntry : Generator Log -> Model -> Model
+insertNewLogEntry logGenerator model =
     let
-        logGenerator : Generator Log
-        logGenerator =
-            Log.generator projectId start end
-
         logDictGenerator : Generator LogDict
         logDictGenerator =
             LogDict.insertGenerator logGenerator model.logDict
@@ -164,7 +160,12 @@ recordCurrentActivityAndSetTo : Posix -> Maybe Activity -> Model -> Model
 recordCurrentActivityAndSetTo now newActivity model =
     (case model.activity of
         Just activity ->
-            insertNewLogEntry activity.pid activity.start now model
+            let
+                logGenerator : Generator Log
+                logGenerator =
+                    Log.generator activity.pid activity.start now
+            in
+            insertNewLogEntry logGenerator model
 
         Nothing ->
             model
