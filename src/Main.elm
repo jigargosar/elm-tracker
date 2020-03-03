@@ -94,6 +94,11 @@ groupLogsByDate zone logDict =
 -- Model
 
 
+type Route
+    = ProjectListRoute
+    | TimelineRoute
+
+
 type alias Model =
     { projectDict : Dict String Project
     , logDict : Dict String Log
@@ -101,6 +106,7 @@ type alias Model =
     , nowForView : Posix
     , here : Zone
     , seed : Seed
+    , route : Route
     }
 
 
@@ -120,6 +126,7 @@ init { now } =
             , nowForView = Time.millisToPosix now
             , here = Time.utc
             , activity = Nothing
+            , route = TimelineRoute
             }
     in
     ( model
@@ -258,7 +265,14 @@ view model =
     column [ class "measure-narrow center ph2 pv2" ]
         [ viewMaybe viewTracked (trackedView model)
         , viewTimeLine model.here model.projectDict (Dict.values model.logDict)
-        , row [ class "pv4 f4 mono" ] [ text "=== OLD VIEWS ===" ]
+        , debugAndOtherViews model
+        ]
+
+
+debugAndOtherViews : Model -> Html Msg
+debugAndOtherViews model =
+    column []
+        [ row [ class "pv4 f4 mono" ] [ text "=== OLD VIEWS ===" ]
         , viewProjectList (getAllProjects model) |> column []
         , viewLogsGroupedByDate model.here model.projectDict (Dict.values model.logDict)
         , viewDebugList "DEBUG: Log Duration"
