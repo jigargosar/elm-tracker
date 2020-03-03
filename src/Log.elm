@@ -1,4 +1,12 @@
-module Log exposing (Log, elapsed, endMillis, generator, idString, projectId, startDate)
+module Log exposing
+    ( Log
+    , elapsed
+    , endMillis
+    , generator
+    , idString
+    , projectId
+    , startDate
+    )
 
 import Date exposing (Date)
 import LogId exposing (LogId)
