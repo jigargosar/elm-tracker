@@ -6,7 +6,7 @@ import Html exposing (Html, a, button, text)
 import Html.Attributes exposing (class, href)
 import Html.Events exposing (onClick)
 import Html.Events.Extra exposing (onClickPreventDefault)
-import Html.Extra exposing (viewMaybe)
+import Html.Extra exposing (nothing, viewMaybe)
 import List.Extra
 import Log exposing (Log)
 import Maybe.Extra
@@ -417,14 +417,21 @@ viewTimeLine activity today zone pd logs =
 
                         _ ->
                             True
+
+                entryViews =
+                    projectEntryList
+                        |> List.filter filterPE
+                        |> List.map viewProjectEntry
             in
-            column [ class "pv2" ]
-                (row [ class "f4" ] [ text (dateToString date) ]
-                    :: (projectEntryList
-                            |> List.filter filterPE
-                            |> List.map viewProjectEntry
-                       )
-                )
+            case entryViews of
+                [] ->
+                    nothing
+
+                _ ->
+                    column [ class "pv2" ]
+                        (row [ class "f4" ] [ text (dateToString date) ]
+                            :: entryViews
+                        )
 
         dateGroupsList =
             logs
