@@ -9,7 +9,7 @@ import Html.Events exposing (onClick)
 import Html.Events.Extra exposing (onClickPreventDefault)
 import Html.Extra exposing (viewMaybe)
 import Json.Decode as JD
-import Json.Encode exposing (Value)
+import Json.Encode as JE exposing (Value)
 import List.Extra
 import Log exposing (Log)
 import LogDict exposing (LogDict)
@@ -112,10 +112,9 @@ init { now, logDict } =
     ( model
     , Time.here |> Task.perform GotHere
     )
-        |> andThen
-            (flip (List.foldl insertNewProject) mockProjectNames
-                >> startActivityTitled currentMockProjectTitle
-            )
+        |> (flip (List.foldl (insertNewProject >> andThen)) mockProjectNames
+                >> andThen (startActivityTitled currentMockProjectTitle)
+           )
 
 
 mockProjectNames =
@@ -143,7 +142,7 @@ getAllProjects =
     .projectDict >> Dict.values
 
 
-insertNewProject : String -> Model -> Model
+insertNewProject : String -> Model -> ( Model, Cmd Msg )
 insertNewProject title model =
     case Random.step (Project.generator title) model.seed of
         ( project, seed ) ->
@@ -152,6 +151,7 @@ insertNewProject title model =
                 , projectDict = insertProject project model.projectDict
                 , seed = seed
             }
+                |> with cacheProjectDict addCmd
 
 
 insertNewLog : Generator Log -> Model -> Model
@@ -200,6 +200,11 @@ startTracking pid now =
 cacheLogDict : Model -> Cmd msg
 cacheLogDict model =
     Port.cacheLogDict (LogDict.encoder model.logDict)
+
+
+cacheProjectDict : Model -> Cmd msg
+cacheProjectDict model =
+    Port.cacheProjectDict (JE.dict identity Project.encoder model.projectDict)
 
 
 stopTracking : Posix -> Model -> ( Model, Cmd Msg )
