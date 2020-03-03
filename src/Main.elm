@@ -391,7 +391,7 @@ gatherLogsByDateThenAggregateLogDurationByProjectId zone =
 
 
 viewTimeLine : Zone -> ProjectDict -> List Log -> Html Msg
-viewTimeLine zone pd =
+viewTimeLine zone pd logs =
     let
         viewProjectEntry : ( ProjectId, TypedTime ) -> Html Msg
         viewProjectEntry ( projectId, elapsedTT ) =
@@ -422,10 +422,13 @@ viewTimeLine zone pd =
                 (row [ class "f4" ] [ text (Date.format "E ddd MMM y" date) ]
                     :: List.map viewProjectEntry projectEntryList
                 )
+
+        dateGroupsList =
+            logs
+                |> gatherLogsByDateThenAggregateLogDurationByProjectId zone
+                |> List.map viewDateGroup
     in
-    gatherLogsByDateThenAggregateLogDurationByProjectId zone
-        >> List.map viewDateGroup
-        >> column []
+    column [] (row [] [ text "Time Line" ] :: dateGroupsList)
 
 
 viewLogsGroupedByDate : Zone -> ProjectDict -> List Log -> Html msg
