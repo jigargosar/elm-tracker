@@ -313,14 +313,22 @@ viewTabs tabs =
     column [ class "pv2 " ] [ row [ class "ph2 bb b--mid-gray justify-around" ] tabsView ]
 
 
-type alias LogView =
-    { log : Log
-    , project : Project
-    , startDate : Date
-    }
+viewRecentLogs : List Log -> Html msg
+viewRecentLogs logs =
+    let
+        viewL l =
+            row [] [ text <| Debug.toString l ]
+    in
+    column [] (List.map viewL logs)
 
 
 
+--type alias LogView =
+--    { log : Log
+--    , project : Project
+--    , startDate : Date
+--    }
+--
 --toLogView : Zone -> ProjectDict -> Log -> Maybe LogView
 --toLogView zone pd log =
 --    Maybe.map
