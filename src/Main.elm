@@ -271,11 +271,11 @@ view model =
         [ viewNavHeader model.page
         , viewMaybe viewTracked (trackedView model)
         , case model.page of
-            ProjectListPage ->
-                viewTimeLine model.here model.projectDict (Dict.values model.logDict)
-
             TimelinePage ->
                 viewTimeLine model.here model.projectDict (Dict.values model.logDict)
+
+            ProjectListPage ->
+                column [] (viewProjectList (getAllProjects model))
         , debugAndOtherViews model
         ]
 
