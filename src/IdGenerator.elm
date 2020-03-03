@@ -1,4 +1,4 @@
-module Id exposing (map)
+module IdGenerator exposing (map)
 
 import Random exposing (Generator)
 
