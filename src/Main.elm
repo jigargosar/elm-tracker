@@ -270,7 +270,8 @@ view model =
                 --    model.here
                 --    model.projectDict
                 --    (Dict.values model.logDict)
-                column [] [ text "RECENT ENTRIES" ]
+                --column [] [ text "RECENT ENTRIES" ]
+                viewRecentLogs (Dict.values model.logDict)
 
             ProjectsTab ->
                 column [] (viewProjectList (getAllProjects model))
@@ -302,6 +303,7 @@ viewTabs tabs =
                      else
                         "bg-moon-gray"
                     )
+                , class "pointer no-selection"
                 , onClickPreventDefault (OnNavLinkClicked tab)
                 ]
                 [ text <| toTitle tab ]
@@ -318,7 +320,7 @@ eqBy f a b =
     f a == f b
 
 
-viewRecentLogs : List Log -> Html msg
+viewRecentLogs : List Log -> Html Msg
 viewRecentLogs logs =
     let
         recentGroups : List ( Log, List Log )
@@ -330,7 +332,7 @@ viewRecentLogs logs =
         viewL l =
             row [] [ text <| Debug.toString l ]
     in
-    column [] (List.map viewL logs)
+    column [] (List.map viewL recentGroups)
 
 
 
