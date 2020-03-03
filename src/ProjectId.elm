@@ -10,6 +10,11 @@ type ProjectId
     = ProjectId String
 
 
+prefix : String
+prefix =
+    "pid_"
+
+
 generator : Generator ProjectId
 generator =
     IdGenerator.map ProjectId
