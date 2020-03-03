@@ -3,7 +3,7 @@ module Log exposing
     , idString, projectId
     , startDate, endMillis
     , sumTracked
-    , encoder, startMillis
+    , decoder, encoder, startMillis
     )
 
 {-|
@@ -19,6 +19,7 @@ module Log exposing
 -}
 
 import Date exposing (Date)
+import Json.Decode as JD exposing (Decoder)
 import Json.Encode as JE exposing (Value)
 import LogId exposing (LogId)
 import ProjectId exposing (ProjectId)
@@ -44,9 +45,28 @@ encoder log =
     JE.object
         [ ( "id_", LogId.encoder log.id_ )
         , ( "pid_", ProjectId.encoder log.pid_ )
-        , ( "start_", JE.int <| startMillis log )
-        , ( "end_", JE.int <| endMillis log )
+        , ( "start_", posixEncoder log.start_ )
+        , ( "end_", posixEncoder log.end_ )
         ]
+
+
+decoder : Decoder Log
+decoder =
+    JD.map4 Log
+        LogId.decoder
+        ProjectId.decoder
+        posixDecoder
+        posixDecoder
+
+
+posixDecoder : Decoder Posix
+posixDecoder =
+    JD.map Time.millisToPosix JD.int
+
+
+posixEncoder : Posix -> Value
+posixEncoder =
+    Time.posixToMillis >> JE.int
 
 
 generator : ProjectId -> Posix -> Posix -> Generator Log

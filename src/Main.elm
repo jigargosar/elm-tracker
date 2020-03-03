@@ -8,6 +8,8 @@ import Html.Attributes exposing (class)
 import Html.Events exposing (onClick)
 import Html.Events.Extra exposing (onClickPreventDefault)
 import Html.Extra exposing (viewMaybe)
+import Json.Decode as JD
+import Json.Encode exposing (Value)
 import List.Extra
 import Log exposing (Log)
 import LogDict exposing (LogDict)
@@ -79,16 +81,23 @@ type alias Model =
 
 type alias Flags =
     { now : Int
+    , logDict : Value
     }
 
 
 init : Flags -> ( Model, Cmd Msg )
-init { now } =
+init { now, logDict } =
     let
         model : Model
         model =
             { projectDict = Dict.empty
-            , logDict = Dict.empty
+            , logDict =
+                case JD.decodeValue LogDict.decoder logDict of
+                    Err err ->
+                        Debug.todo "implement decoding error for logDict"
+
+                    Ok ld ->
+                        ld
             , seed = Random.initialSeed now
             , nowForView = Time.millisToPosix now
             , here = Time.utc

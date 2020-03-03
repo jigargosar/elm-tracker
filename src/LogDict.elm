@@ -1,8 +1,9 @@
-module LogDict exposing (LogDict, encoder, insertGenerator, logsForProjectIdOnDate)
+module LogDict exposing (LogDict, decoder, encoder, insertGenerator, logsForProjectIdOnDate)
 
 import Basics.Extra exposing (flip)
 import Date exposing (Date)
 import Dict exposing (Dict)
+import Json.Decode as JD exposing (Decoder)
 import Json.Encode as JE exposing (Value)
 import Log exposing (Log)
 import ProjectId exposing (ProjectId)
@@ -44,3 +45,8 @@ logsForProjectIdOnDate zone date projectId =
 encoder : LogDict -> Value
 encoder =
     JE.dict identity Log.encoder
+
+
+decoder : Decoder LogDict
+decoder =
+    JD.dict Log.decoder
