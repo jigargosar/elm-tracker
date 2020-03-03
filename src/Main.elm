@@ -504,10 +504,15 @@ viewTracked2 maybeV =
 
 
 btn1 : String -> Html Msg
-btn1 title =
+btn1 =
+    btn2 NoOp
+
+
+btn2 : Msg -> String -> Html Msg
+btn2 msg title =
     button
         [ class "pointer bn pv1 ph2"
-        , onClick NoOp
+        , onClick msg
         ]
         [ text title ]
 
