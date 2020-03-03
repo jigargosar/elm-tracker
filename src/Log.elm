@@ -2,7 +2,7 @@ module Log exposing
     ( Log, generator
     , idString, projectId
     , startDate, endMillis
-    , elapsed
+    , tracked
     )
 
 {-|
@@ -69,9 +69,9 @@ endMillis =
     end >> Time.posixToMillis
 
 
-elapsed : Log -> TypedTime
-elapsed =
-    elapsedMillis >> toFloat >> TypedTime.milliseconds
+tracked : Log -> TypedTime
+tracked =
+    trackedMillis >> toFloat >> TypedTime.milliseconds
 
 
 
@@ -83,8 +83,8 @@ startMillis =
     start >> Time.posixToMillis
 
 
-elapsedMillis : Log -> Int
-elapsedMillis log =
+trackedMillis : Log -> Int
+trackedMillis log =
     endMillis log - startMillis log
 
 

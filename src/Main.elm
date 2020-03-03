@@ -263,7 +263,7 @@ view model =
         , viewLogsGroupedByDate model.here model.projectDict (Dict.values model.logDict)
         , viewDebugList "DEBUG: Log Duration"
             (getAllSortedLogsEntries model
-                |> List.map Log.elapsed
+                |> List.map Log.tracked
             )
         , viewDebugList "DEBUG: ALL PROJECTS" (getAllProjects model)
         , viewDebugList "DEBUG: ALL LOG ENTRIES" (getAllSortedLogsEntries model)
@@ -300,7 +300,7 @@ aggregateLogDurationByProject =
         >> List.map
             (\( f, r ) ->
                 ( f.project
-                , f :: r |> List.foldl (.log >> Log.elapsed >> TypedTime.add) TypedTime.zero
+                , f :: r |> List.foldl (.log >> Log.tracked >> TypedTime.add) TypedTime.zero
                 )
             )
         >> List.sortBy (Tuple.second >> TypedTime.toSeconds >> negate)
@@ -319,7 +319,7 @@ aggregateLogDurationByProjectId =
         >> List.map
             (\( f, r ) ->
                 ( Log.projectId f
-                , f :: r |> List.foldl (Log.elapsed >> TypedTime.add) TypedTime.zero
+                , f :: r |> List.foldl (Log.tracked >> TypedTime.add) TypedTime.zero
                 )
             )
         >> List.sortBy (Tuple.second >> TypedTime.toSeconds >> negate)
@@ -424,7 +424,7 @@ trackedView model =
                                     (Date.fromPosix model.here model.nowForView)
                                     activity.pid
                                     model.logDict
-                                    |> List.foldl (Log.elapsed >> TypedTime.add) TypedTime.zero
+                                    |> List.foldl (Log.tracked >> TypedTime.add) TypedTime.zero
 
                             millisTrackedInActivity : TypedTime
                             millisTrackedInActivity =
