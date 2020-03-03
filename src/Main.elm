@@ -207,8 +207,8 @@ update message model =
         NoOp ->
             ( model, Cmd.none )
 
-        OnNavLinkClicked route ->
-            ( { model | tab = route }, Cmd.none )
+        OnNavLinkClicked tab ->
+            ( { model | tab = tab }, Cmd.none )
 
         GotHere here ->
             ( { model | here = here }, Cmd.none )
@@ -275,10 +275,10 @@ view model =
         ]
 
 
-viewNavHeader currentRoute =
+viewNavHeader currentTab =
     let
-        toClassString route =
-            if route == currentRoute then
+        toClassString tab =
+            if tab == currentTab then
                 "blue no-underline"
 
             else
@@ -293,14 +293,14 @@ viewNavHeader currentRoute =
                 RecentTab ->
                     "TimelineRoute"
 
-        link route =
+        link tab =
             a
                 [ class "mr2"
-                , class <| toClassString route
+                , class <| toClassString tab
                 , href "/projects"
-                , onClickPreventDefault (OnNavLinkClicked route)
+                , onClickPreventDefault (OnNavLinkClicked tab)
                 ]
-                [ text <| toTitle route ]
+                [ text <| toTitle tab ]
 
         links =
             [ RecentTab, ProjectsTab ]
