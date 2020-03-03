@@ -12,7 +12,7 @@ type ProjectId
 
 prefix : String
 prefix =
-    "pid_"
+    "project_id_"
 
 
 generator : Generator ProjectId
