@@ -306,7 +306,7 @@ viewNavHeader currentTab =
             [ RecentTab, ProjectsTab ]
 
         links =
-            [ RecentTab, ProjectsTab ]
+            tabList
                 |> List.map viewTabHeader
     in
     row [ class "pv2" ] links
