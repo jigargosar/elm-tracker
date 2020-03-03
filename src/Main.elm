@@ -291,13 +291,15 @@ viewTabs tabs =
         viewTabTitle : Bool -> Tab -> Html Msg
         viewTabTitle isSelected tab =
             row
-                [ class "flex-auto pv1 ph3 bt br--top br2 b--transparent"
+                [ class "pv1 ph3 flex-auto"
+                , class "mid-gray"
+                , class "bt br--top br2 b--transparent"
                 , class
                     (if isSelected then
-                        "bg-black white"
+                        "bg-mid-gray white"
 
                      else
-                        ""
+                        "bg-moon-gray"
                     )
                 , onClickPreventDefault (OnNavLinkClicked tab)
                 ]
@@ -308,7 +310,7 @@ viewTabs tabs =
                 |> Pivot.mapCS (viewTabTitle True) (viewTabTitle False)
                 |> Pivot.toList
     in
-    column [ class "pv2 " ] [ row [ class "ph2 bb justify-around" ] tabsView ]
+    column [ class "pv2 " ] [ row [ class "ph2 bb b--mid-gray justify-around" ] tabsView ]
 
 
 type alias LogView =
