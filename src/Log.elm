@@ -1,12 +1,19 @@
 module Log exposing
-    ( Log
+    ( Log, generator
+    , idString, projectId
+    , startDate, endMillis
     , elapsed
-    , endMillis
-    , generator
-    , idString
-    , projectId
-    , startDate
     )
+
+{-|
+
+@docs Log, generator
+
+@docs idString, projectId
+
+@docs startDate, endMillis
+
+-}
 
 import Date exposing (Date)
 import LogId exposing (LogId)
@@ -14,6 +21,10 @@ import ProjectId exposing (ProjectId)
 import Random exposing (Generator)
 import Time exposing (Posix, Zone)
 import TypedTime exposing (TypedTime)
+
+
+
+-- PUBLIC
 
 
 type alias Log =
@@ -38,24 +49,9 @@ generator projectId_ start_ end_ =
     LogId.generator |> Random.map initHelp
 
 
-elapsedMillis : Log -> Int
-elapsedMillis log =
-    endMillis log - startMillis log
-
-
-elapsed : Log -> TypedTime
-elapsed =
-    elapsedMillis >> toFloat >> TypedTime.milliseconds
-
-
 idString : Log -> String
 idString =
     id >> LogId.toString
-
-
-id : Log -> LogId
-id =
-    .id_
 
 
 projectId : Log -> ProjectId
@@ -68,14 +64,33 @@ startDate zone =
     start >> Date.fromPosix zone
 
 
+endMillis : Log -> Int
+endMillis =
+    end >> Time.posixToMillis
+
+
+elapsed : Log -> TypedTime
+elapsed =
+    elapsedMillis >> toFloat >> TypedTime.milliseconds
+
+
+
+-- PRIVATE
+
+
 startMillis : Log -> Int
 startMillis =
     start >> Time.posixToMillis
 
 
-endMillis : Log -> Int
-endMillis =
-    end >> Time.posixToMillis
+elapsedMillis : Log -> Int
+elapsedMillis log =
+    endMillis log - startMillis log
+
+
+id : Log -> LogId
+id =
+    .id_
 
 
 start : Log -> Posix
