@@ -171,38 +171,44 @@ insertNewProject title model =
             }
 
 
-startTracking : ProjectId -> Posix -> Model -> Model
-startTracking pid now model =
-    case model.activity of
-        Just activity ->
-            case Random.step (Log.generator activity.pid activity.start now) model.seed of
-                ( log, seed ) ->
-                    { model
-                        | activity = Just (Activity pid now)
-                        , logDict = insertLog log model.logDict
-                        , seed = seed
-                    }
-
-        Nothing ->
+insertNewLogEntry : ProjectId -> Posix -> Posix -> Model -> Model
+insertNewLogEntry projectId start end model =
+    case Random.step (Log.generator projectId start end) model.seed of
+        ( log, seed ) ->
             { model
-                | activity = Just (Activity pid now)
+                | logDict = insertLog log model.logDict
+                , seed = seed
             }
 
 
-stopTracking : Posix -> Model -> Model
-stopTracking now model =
-    case model.activity of
+setActivity activity model =
+    { model | activity = activity }
+
+
+recordCurrentActivityAndSetTo : Posix -> Maybe Activity -> Model -> Model
+recordCurrentActivityAndSetTo now newActivity model =
+    (case model.activity of
         Just activity ->
-            case Random.step (Log.generator activity.pid activity.start now) model.seed of
-                ( log, seed ) ->
-                    { model
-                        | activity = Nothing
-                        , logDict = insertLog log model.logDict
-                        , seed = seed
-                    }
+            insertNewLogEntry activity.pid activity.start now model
 
         Nothing ->
-            { model | activity = Nothing }
+            model
+    )
+        |> setActivity newActivity
+
+
+startTracking : ProjectId -> Posix -> Model -> Model
+startTracking pid now =
+    let
+        activity =
+            Just (Activity pid now)
+    in
+    recordCurrentActivityAndSetTo now activity
+
+
+stopTracking : Posix -> Model -> Model
+stopTracking now =
+    recordCurrentActivityAndSetTo now Nothing
 
 
 
