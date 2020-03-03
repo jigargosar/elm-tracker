@@ -122,9 +122,14 @@ init { now, logDict, projectDict } =
     ( model
     , Time.here |> Task.perform GotHere
     )
-        |> (flip (List.foldl (insertNewProject >> andThen)) mockProjectNames
+        |> (andThenIf (Dict.isEmpty model.projectDict) insertMockProjects
                 >> andThen (startActivityTitled currentMockProjectTitle)
            )
+
+
+insertMockProjects : Model -> ( Model, Cmd Msg )
+insertMockProjects =
+    sequence (List.map insertNewProject mockProjectNames)
 
 
 mockProjectNames =
