@@ -300,7 +300,7 @@ aggregateLogDurationByProject =
         >> List.map
             (\( f, r ) ->
                 ( f.project
-                , f :: r |> List.map (.log >> Log.elapsed) |> List.foldl TypedTime.add TypedTime.zero
+                , f :: r |> List.foldl (.log >> Log.elapsed >> TypedTime.add) TypedTime.zero
                 )
             )
         >> List.sortBy (Tuple.second >> TypedTime.toSeconds >> negate)
