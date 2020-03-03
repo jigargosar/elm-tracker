@@ -49,4 +49,13 @@ encoder =
 
 decoder : Decoder LogDict
 decoder =
-    JD.dict Log.decoder
+    JD.keyValuePairs JD.value
+        |> JD.map
+            (List.map
+                (Tuple.second
+                    >> JD.decodeValue Log.decoder
+                    >> Result.mapError JD.errorToString
+                    >> Debug.log "debug"
+                )
+            )
+        |> JD.map (always Dict.empty)

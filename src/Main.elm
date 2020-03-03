@@ -92,8 +92,8 @@ init { now, logDict } =
         model =
             { projectDict = Dict.empty
             , logDict =
-                case JD.decodeValue LogDict.decoder logDict of
-                    Err err ->
+                case JD.decodeValue LogDict.decoder logDict |> Result.mapError (JD.errorToString >> Debug.log "err") of
+                    Err _ ->
                         Debug.todo "implement decoding error for logDict"
 
                     Ok ld ->

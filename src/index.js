@@ -39,8 +39,8 @@ function initElmApp() {
         window.innerWidth - document.body.clientWidth,
         window.innerHeight - document.body.clientHeight,
       ],
+      logDict: JSON.parse(localStorage.getItem('logDict') || '{}'),
     },
-    logDict: JSON.parse(localStorage.getItem('logDict') || '[]'),
   })
   return app
 }
