@@ -1,8 +1,9 @@
-module LogDict exposing (LogDict, insertGenerator, logsForProjectIdOnDate)
+module LogDict exposing (LogDict, encoder, insertGenerator, logsForProjectIdOnDate)
 
 import Basics.Extra exposing (flip)
 import Date exposing (Date)
 import Dict exposing (Dict)
+import Json.Encode as JE exposing (Value)
 import Log exposing (Log)
 import ProjectId exposing (ProjectId)
 import Random exposing (Generator)
@@ -38,3 +39,8 @@ logsForProjectIdOnDate zone date projectId =
                 , propSatisfies (Log.startDate zone) (Date.isBetween date date)
                 ]
             )
+
+
+encoder : LogDict -> Value
+encoder =
+    JE.dict identity Log.encoder

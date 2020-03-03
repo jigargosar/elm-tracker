@@ -3,7 +3,7 @@ module Log exposing
     , idString, projectId
     , startDate, endMillis
     , sumTracked
-    , startMillis
+    , encoder, startMillis
     )
 
 {-|
@@ -19,6 +19,7 @@ module Log exposing
 -}
 
 import Date exposing (Date)
+import Json.Encode as JE exposing (Value)
 import LogId exposing (LogId)
 import ProjectId exposing (ProjectId)
 import Random exposing (Generator)
@@ -36,6 +37,16 @@ type alias Log =
     , start_ : Posix
     , end_ : Posix
     }
+
+
+encoder : Log -> Value
+encoder log =
+    JE.object
+        [ ( "id_", LogId.encoder log.id_ )
+        , ( "pid_", ProjectId.encoder log.pid_ )
+        , ( "start_", JE.int <| startMillis log )
+        , ( "end_", JE.int <| endMillis log )
+        ]
 
 
 generator : ProjectId -> Posix -> Posix -> Generator Log
