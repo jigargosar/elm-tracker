@@ -81,16 +81,6 @@ is =
     (==)
 
 
-groupLogsByDate : Zone -> LogDict -> List ( Log, List Log )
-groupLogsByDate zone logDict =
-    let
-        logs : List Log
-        logs =
-            Dict.values logDict
-    in
-    List.Extra.gatherEqualsBy (Log.startDate zone) logs
-
-
 
 -- Model
 
@@ -276,7 +266,6 @@ view model =
 
             ProjectListPage ->
                 column [] (viewProjectList (getAllProjects model))
-        , debugAndOtherViews model
         ]
 
 
@@ -312,21 +301,6 @@ viewNavHeader currentRoute =
                 |> List.map link
     in
     row [ class "pv2" ] links
-
-
-debugAndOtherViews : Model -> Html Msg
-debugAndOtherViews model =
-    column []
-        [ row [ class "pv4 f4 mono" ] [ text "=== OLD VIEWS ===" ]
-        , viewProjectList (getAllProjects model) |> column []
-        , viewLogsGroupedByDate model.here model.projectDict (Dict.values model.logDict)
-        , viewDebugList "DEBUG: Log Duration"
-            (getAllSortedLogsEntries model
-                |> List.map (List.singleton >> Log.sumTracked)
-            )
-        , viewDebugList "DEBUG: ALL PROJECTS" (getAllProjects model)
-        , viewDebugList "DEBUG: ALL LOG ENTRIES" (getAllSortedLogsEntries model)
-        ]
 
 
 type alias LogView =
@@ -428,46 +402,7 @@ viewTimeLine zone pd logs =
                 |> gatherLogsByDateThenAggregateLogDurationByProjectId zone
                 |> List.map viewDateGroup
     in
-    column [] (row [] [ text "Time Line" ] :: dateGroupsList)
-
-
-viewLogsGroupedByDate : Zone -> ProjectDict -> List Log -> Html msg
-viewLogsGroupedByDate zone pd allLogs =
-    let
-        logViewsByDateAndThenByProject : List ( Date, List ( Project, TypedTime ) )
-        logViewsByDateAndThenByProject =
-            allLogs
-                |> toLogViewList zone pd
-                |> List.Extra.gatherEqualsBy .startDate
-                |> List.map
-                    (\( lv, restLv ) ->
-                        ( lv.startDate
-                        , lv :: restLv
-                        )
-                    )
-                |> List.sortBy (Tuple.first >> Date.toRataDie)
-                |> List.map (Tuple.mapSecond aggregateLogDurationByProject)
-
-        viewProjectEntry : ( Project, TypedTime ) -> Html msg
-        viewProjectEntry ( project, elapsedTT ) =
-            let
-                formattedTime =
-                    elapsedTT |> TypedTime.toString TypedTime.Seconds
-            in
-            row []
-                [ column [ class "flex-auto" ] [ text <| Project.title project ]
-                , column [] [ text formattedTime ]
-                ]
-
-        viewDateGroup : ( Date, List ( Project, TypedTime ) ) -> Html msg
-        viewDateGroup ( date, list ) =
-            column [ class "pv2" ]
-                (row [ class "f4" ] [ text (Date.format "E ddd MMM y" date) ]
-                    :: List.map viewProjectEntry list
-                )
-    in
-    column [ class "pv2" ]
-        (List.map viewDateGroup logViewsByDateAndThenByProject)
+    column [] (row [ class "pv2 f4" ] [ text "Time Line" ] :: dateGroupsList)
 
 
 trackedView : Model -> Maybe ActivityView
@@ -557,23 +492,6 @@ viewProjectList =
                 ]
     in
     List.map vp
-
-
-viewDebugList : String -> List a -> Html msg
-viewDebugList title list =
-    column [ class "pv2" ]
-        (row [ class "pv1 f4" ] [ text title ]
-            :: viewDebugListItems list
-        )
-
-
-viewDebugListItems : List a -> List (Html msg)
-viewDebugListItems =
-    let
-        viewDebugListItem item =
-            row [] [ text <| Debug.toString item ]
-    in
-    List.map viewDebugListItem
 
 
 row : List (Html.Attribute msg) -> List (Html msg) -> Html msg
