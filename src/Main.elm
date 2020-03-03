@@ -288,8 +288,8 @@ viewTabs tabs =
                 RecentTab ->
                     "Recent"
 
-        viewTabHeader : Bool -> Tab -> Html Msg
-        viewTabHeader isSelected tab =
+        viewTabTitle : Bool -> Tab -> Html Msg
+        viewTabTitle isSelected tab =
             row
                 [ class "pa1"
                 , class
@@ -305,7 +305,7 @@ viewTabs tabs =
 
         tabsView =
             tabs
-                |> Pivot.mapCS (viewTabHeader True) (viewTabHeader False)
+                |> Pivot.mapCS (viewTabTitle True) (viewTabTitle False)
                 |> Pivot.toList
     in
     row [ class "pv2 justify-around bg-black white" ] tabsView
