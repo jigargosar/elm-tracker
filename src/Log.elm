@@ -1,4 +1,4 @@
-module Log exposing (Log, elapsedMillis, generator)
+module Log exposing (Log, elapsed, elapsedMillis, generator)
 
 import LogId exposing (LogId)
 import ProjectId exposing (ProjectId)
