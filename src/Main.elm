@@ -291,7 +291,7 @@ viewTabs tabs =
         viewTabTitle : Bool -> Tab -> Html Msg
         viewTabTitle isSelected tab =
             row
-                [ class "pa1"
+                [ class "pa1 bt br--top br2 b--transparent"
                 , class
                     (if isSelected then
                         "bg-white black no-underline"
@@ -308,7 +308,7 @@ viewTabs tabs =
                 |> Pivot.mapCS (viewTabTitle True) (viewTabTitle False)
                 |> Pivot.toList
     in
-    row [ class "pv2 justify-around bg-black white" ] tabsView
+    column [ class "pv2 " ] [ row [ class "pt1 bt br--top br2  justify-around bg-black white" ] tabsView ]
 
 
 type alias LogView =
