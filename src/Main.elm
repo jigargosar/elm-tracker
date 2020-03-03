@@ -2,9 +2,10 @@ module Main exposing (main)
 
 import Date exposing (Date)
 import Dict exposing (Dict)
-import Html exposing (Html, button, text)
-import Html.Attributes exposing (class)
+import Html exposing (Html, a, button, text)
+import Html.Attributes exposing (class, href)
 import Html.Events exposing (onClick)
+import Html.Events.Extra exposing (onClickPreventDefault)
 import Html.Extra exposing (viewMaybe)
 import List.Extra
 import Log exposing (Log)
@@ -263,7 +264,8 @@ subscriptions _ =
 view : Model -> Html Msg
 view model =
     column [ class "measure-narrow center ph2 pv2" ]
-        [ viewMaybe viewTracked (trackedView model)
+        [ viewNavHeader model.route
+        , viewMaybe viewTracked (trackedView model)
         , case model.route of
             ProjectListRoute ->
                 viewTimeLine model.here model.projectDict (Dict.values model.logDict)
@@ -272,6 +274,47 @@ view model =
                 viewTimeLine model.here model.projectDict (Dict.values model.logDict)
         , debugAndOtherViews model
         ]
+
+
+viewNavHeader currentRoute =
+    let
+        toMsg route =
+            if route == currentRoute then
+                NoOp
+
+            else
+                NoOp
+
+        toClassString route =
+            if route == currentRoute then
+                "color"
+
+            else
+                "NoOp"
+
+        toTitle : Route -> String
+        toTitle route =
+            case route of
+                ProjectListRoute ->
+                    "ProjectListRoute"
+
+                TimelineRoute ->
+                    "TimelineRoute"
+
+        link route =
+            a
+                [ class "mr2"
+                , class <| toClassString route
+                , href "/projects"
+                , onClickPreventDefault (toMsg route)
+                ]
+                [ text <| toTitle route ]
+
+        links =
+            [ TimelineRoute, ProjectListRoute ]
+                |> List.map link
+    in
+    row [ class "pv2" ] links
 
 
 debugAndOtherViews : Model -> Html Msg
