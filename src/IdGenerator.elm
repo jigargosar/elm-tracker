@@ -17,4 +17,4 @@ mapWithPrefix prefix func =
 
 decodeWhenPrefixed : String -> (String -> id) -> Decoder id
 decodeWhenPrefixed prefix func =
-    Json.Decode.Extra.when JD.string (String.startsWith prefix) (JD.map func JD.string)
+    JD.map func JD.string

@@ -53,10 +53,10 @@ encoder log =
 decoder : Decoder Log
 decoder =
     JD.map4 Log
-        LogId.decoder
-        ProjectId.decoder
-        posixDecoder
-        posixDecoder
+        (JD.field "id_" LogId.decoder)
+        (JD.field "pid_" ProjectId.decoder)
+        (JD.field "start_" posixDecoder)
+        (JD.field "end_" posixDecoder)
 
 
 posixDecoder : Decoder Posix

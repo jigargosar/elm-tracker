@@ -89,14 +89,14 @@ type alias Flags =
 init : Flags -> ( Model, Cmd Msg )
 init { now, logDict } =
     let
-        _ =
-            LogId.foo
-
         model : Model
         model =
             { projectDict = Dict.empty
             , logDict =
-                case JD.decodeValue LogDict.decoder logDict |> Result.mapError (JD.errorToString >> Debug.log "err") of
+                case
+                    JD.decodeValue LogDict.decoder logDict
+                        |> Result.mapError (JD.errorToString >> Debug.log "err")
+                of
                     Err _ ->
                         Debug.todo "implement decoding error for logDict"
 
