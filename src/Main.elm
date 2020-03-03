@@ -71,6 +71,7 @@ type alias Model =
     { projectDict : Dict String Project
     , logDict : Dict String Log
     , activity : Maybe Activity
+    , selectedProjectId : Maybe ProjectId
     , nowForView : Posix
     , here : Zone
     , seed : Seed
@@ -110,6 +111,7 @@ init { now, logDict, projectDict } =
 
                     Ok dict ->
                         dict
+            , selectedProjectId = Nothing
             , seed = Random.initialSeed now
             , nowForView = Time.millisToPosix now
             , here = Time.utc
