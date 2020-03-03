@@ -287,10 +287,10 @@ viewNavHeader currentRoute =
 
         toClassString route =
             if route == currentRoute then
-                "color"
+                "blue no-underline"
 
             else
-                "NoOp"
+                "black"
 
         toTitle : Route -> String
         toTitle route =
