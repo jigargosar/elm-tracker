@@ -3,7 +3,7 @@ module Main exposing (main)
 import Basics.Extra exposing (flip)
 import Date exposing (Date)
 import Dict exposing (Dict)
-import Html exposing (Html, a, button, text)
+import Html exposing (Html, a, button, option, select, text)
 import Html.Attributes exposing (class)
 import Html.Events exposing (onClick)
 import Html.Events.Extra exposing (onClickPreventDefault)
@@ -306,6 +306,7 @@ view : Model -> Html Msg
 view model =
     column [ class "measure-narrow center ph2 pv2" ]
         [ viewMaybe viewTracked (trackedView model)
+        , viewTracked2
         , viewTabs model.tabs
         , case Pivot.getC model.tabs of
             RecentTab ->
@@ -566,6 +567,34 @@ type alias ActivityView =
     , title : String
     , trackedTimeToday : TypedTime
     }
+
+
+viewTracked2 : Html Msg
+viewTracked2 =
+    let
+        o1 title =
+            option [] [ text title ]
+
+        titles =
+            "--ADD NEW--" :: mockProjectNames
+    in
+    column [ class "pv2" ]
+        [ column [] [ select [] (List.map o1 titles) ]
+        , row [ class "pv1" ]
+            [ row [ class "flex-auto" ] []
+            , row [ class "pv1 mr2" ] [ text "00:02::11" ]
+            , row [ class "" ] [ btn1 "STOP" ]
+            ]
+        ]
+
+
+btn1 : String -> Html Msg
+btn1 title =
+    button
+        [ class "pointer bn pv1 ph2"
+        , onClick NoOp
+        ]
+        [ text title ]
 
 
 viewTracked : ActivityView -> Html Msg
